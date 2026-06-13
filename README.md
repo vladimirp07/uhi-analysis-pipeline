@@ -67,6 +67,10 @@ UHI_Analysis_pipeline_MVP_v1/
 │   ├── plots.py                    # Funciones para la suite visual de auditoría geoespacial
 │   └── stats.py                    # Cálculo de correlaciones Spearman físicas y socioambientales
 ├── main.py                         # Orquestador del pipeline completo de producción
+├── run_hotspots_analysis.py        # Detección de hotspots térmicos y clustering DBSCAN
+├── run_coldspots_analysis.py       # Identificación de coldspots y amortiguamiento térmico
+├── run_scale_correlation_analysis.py # Análisis de efecto de escala (MAUP) y modelado GWR
+├── run_density_zones_analysis.py   # Segmentación y análisis de correlación por zonas de densidad construida
 ├── requirements.txt                # Dependencias librerías Python del entorno
 └── test_features_suhi.py           # Script autónomo para pruebas de integración del pipeline
 ```
@@ -195,10 +199,26 @@ A continuación se detallan las variables físicas y sociales que presentan mayo
 | **9** | **`POB0_14`** | **-0.094** | Menor Calor | Conteo absoluto de población infantil en zonas periféricas. |
 | **10** | **`pct_psinder`** | **-0.085** | Menor Calor | Marginación en salud correlacionada con las áreas periféricas más templadas. |
 
+#### 5.2.2. Análisis de Correlación Diferenciado por Zonas de Densidad Construida (Nuevo Enfoque)
+A diferencia del análisis global de la ZMM (que promedia y diluye las dinámicas biofísicas y sociales, arrojando coeficientes globales bajos como $r = -0.230$ para `green_pct`), el pipeline incorpora una segmentación espacial basada en la densidad de superficie impermeable (`dw_built_pct` de Dynamic World). Esto divide el área de estudio en tres regímenes diferenciados:
+
+1. **Baja Densidad (< 20% de superficie construida)**: Representa la interfaz urbano-rural y áreas periféricas.
+   * **Dinámica Térmica**: La cobertura vegetal (`green_pct`) y el dosel arbóreo (`dw_trees_pct`) ejercen su máximo poder regulador por evapotranspiración, mostrando correlaciones Spearman excepcionalmente altas con el enfriamiento ($r = -0.604$ y $r = -0.649$, respectivamente). 
+   * **Efecto de Buffer**: A nivel local, los buffers de vegetación a 500m y 1000m incrementan el efecto de enfriamiento hasta $r = -0.844$ y $r = -0.797$.
+2. **Media Densidad (20-60% de superficie construida)**: Corresponde a las zonas residenciales intermedias y corredores urbanos.
+   * **Dinámica Térmica**: La correlación de la vegetación global disminuye ($r = -0.160$), y el porcentaje construido directo (`dw_built_pct`) pierde significancia ($r = 0.009$).
+   * **Driver Principal**: Las actividades industriales activas y la cercanía a estas áreas se convierten en los principales inductores de calor. La densidad industrial en un buffer de 250m muestra un Spearman de $r = +0.326$, y la distancia euclidiana a industrias tiene una relación inversa significativa de $r = -0.295$.
+3. **Alta Densidad (>= 60% de superficie construida)**: Zonas del núcleo urbano denso, centros históricos y parques industriales masivos.
+   * **Dinámica Térmica**: Se observa un efecto de saturación térmica donde la correlación de la vegetación local o de la densidad de concreto se vuelve insignificante ($r \approx -0.060$).
+   * **Driver Principal**: La inercia térmica acumulada por la morfología urbana y el calor antropogénico domina el comportamiento de la SUHI. A esta escala, las correlaciones sociales de vulnerabilidad y justicia ambiental cobran mayor fuerza, mostrando que la escolaridad (`graproes`, $r = +0.127$) y el acceso a aire acondicionado (`pct_vph_refri`, $r = +0.121$) se concentran en las zonas centrales calientes, mientras que las áreas de marginación periférica (`pct_vph_snbien`, $r = -0.146$) se ubican en zonas periféricas más frescas.
+
+Para ejecutar este análisis segmentado y generar los heatmaps de correlación por zona y los perfiles multiescala de buffers, utiliza el script:
+`python run_density_zones_analysis.py`
+
 #### Propuestas Estadísticas Avanzadas (Próximos Pasos):
 Para superar las limitaciones de la correlación simple, se propone incorporar en futuras iteraciones:
-1.  **Autocorrelación Espacial (Moran's I Global y Local)**: El fenómeno SUHI viola el supuesto estadístico de independencia de las observaciones. Calcular el Índice de Moran permitiría mapear estadísticamente los **Hotspots (LISA - Local Indicators of Spatial Association)** de calor urbano (zonas industriales y de alta densidad edificada) y **Coldspots** (zonas arboladas y de control rural).
-2.  **Modelos de Regresión Espacial (SAR y GWR)**: OLS estándar (mínimos cuadrados) sufre de autocorrelación en los residuos en datos espaciales. Se propone implementar modelos de **Regresión Espacial Autorregresiva (SAR)** o **Regresión Ponderada Geográficamente (GWR)** para evaluar el impacto local y espacialmente variable de coberturas como `dw_built_pct` y `dw_trees_pct` sobre la intensidad de `suhi_day_c`.
+1.  **Autocorrelación Espacial (Moran's I Global y Local)**: El fenómeno SUHI viola el supuesto de independencia de las observaciones. Calcular el Índice de Moran permitiría mapear estadísticamente los **Hotspots (LISA - Local Indicators of Spatial Association)** de calor urbano (zonas industriales y de alta densidad edificada) y **Coldspots** (zonas arboladas y de control rural).
+2.  **Modelos de Regresión Espacial (SAR y GWR)**: OLS estándar sufre de autocorrelación en los residuos en datos espaciales. Se propone implementar modelos de **Regresión Espacial Autorregresiva (SAR)** o **Regresión Ponderada Geográficamente (GWR)** para evaluar el impacto local y espacialmente variable de coberturas como `dw_built_pct` y `dw_trees_pct` sobre la intensidad de `suhi_day_c`.
 3.  **Índice de Vulnerabilidad Térmica (TVI)**: Construcción de un índice multivariado ponderado que combine el Peligro Físico (intensidad SUHI) con la Sensibilidad Social (densidad de población de adultos mayores `pct_65_mas` y densidad de población infantil `pct_0_14` por AGEB).
 
 ### 5.3. Auditoría de Calidad y Naturaleza de las Fuentes de Datos
