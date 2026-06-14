@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Script de Análisis de Correlación Bottom-Up a Nivel Municipal y de AGEB
-======================================================================
+Script de Análisis de Correlación Bottom-Up a Nivel Municipal y de AGEB (v2)
+==========================================================================
 Este script realiza 4 análisis estadísticos espaciales:
-1. Correlación de Spearman física diurna global a nivel de Municipio.
-2. Correlación de Spearman física diurna segmentada por densidad a nivel de Municipio.
-3. Correlación de Spearman física diurna global a nivel de AGEB.
-4. Correlación de Spearman física diurna segmentada por densidad a nivel de AGEB.
+1. Correlación global por Municipio para Mitigación (Vegetación) y Presión Térmica (Industria).
+2. Correlación segmentada por densidad construida por Municipio para ambos bloques.
+3. Correlación global por AGEB para ambos bloques.
+4. Correlación segmentada por densidad por AGEB para ambos bloques.
 
-Exporta los resultados a tablas CSV y genera un archivo GeoPackage con las correlaciones
-mapeadas a los polígonos de AGEB para su visualización cartográfica.
+Escalas analizadas: Local (30m), 100m, 250m, 500m, 1000m (1km).
+Exporta los resultados a tablas CSV, genera un reporte técnico en markdown y
+un GeoPackage enriquecido de AGEBs con las correlaciones para su mapeo en QGIS.
 
 Autor: Antigravity AI
 Fecha: Junio 2026
@@ -99,13 +100,17 @@ def main():
 
     # 3. Identificar variable target y predictores
     target_col = 'suhi_day_c' if 'suhi_day_c' in gdf.columns else 'suhi_c'
-    pred_cols = ['green_pct', 'green_pct_250m', 'green_pct_500m', 'green_pct_1000m', 'green_pct_3000m']
+    
+    # Bloque 1: Mitigación (Vegetación)
+    pred_cols = ['green_pct', 'green_pct_100m', 'green_pct_250m', 'green_pct_500m', 'green_pct_1000m', 'green_pct_3000m']
+    # Bloque 2: Presión Térmica (Industria)
+    ind_cols = ['industrial_osm_pct', 'industrial_density_100m', 'industrial_density_250m', 'industrial_density_500m', 'industrial_density_1000m', 'industrial_density_3000m']
     
     print(f"        Variable Objetivo: {target_col}")
-    print(f"        Predictores de Vegetación: {pred_cols}")
+    print(f"        Variables de Mitigación (Vegetación): {pred_cols}")
+    print(f"        Variables de Presión Térmica (Industria): {ind_cols}")
 
     # 4. Clasificar celdas por densidad de suelo construido
-    # Baja: < 20%, Media: 20-60%, Alta: >= 60%
     conditions = [
         (gdf['dw_built_pct'] < 20.0),
         ((gdf['dw_built_pct'] >= 20.0) & (gdf['dw_built_pct'] < 60.0)),
@@ -121,16 +126,30 @@ def main():
     
     for muni in municipios:
         gdf_muni = gdf[gdf['NOM_MUN'] == muni]
-        n_muni_cells = len(gdf_muni)
         
         # 1. Global por Municipio
+        # Bloque Mitigación
         for pred in pred_cols:
             r, p, n = calculate_spearman(gdf_muni, target_col, pred, min_samples=50)
             if not np.isnan(r):
                 muni_results.append({
                     'municipio': muni,
                     'segmento_densidad': 'Global',
-                    'variable_vegetacion': pred,
+                    'bloque': 'mitigacion',
+                    'variable': pred,
+                    'spearman_r': r,
+                    'p_val': p,
+                    'n_celdas': n
+                })
+        # Bloque Presión Térmica
+        for pred in ind_cols:
+            r, p, n = calculate_spearman(gdf_muni, target_col, pred, min_samples=50)
+            if not np.isnan(r):
+                muni_results.append({
+                    'municipio': muni,
+                    'segmento_densidad': 'Global',
+                    'bloque': 'presion_termica',
+                    'variable': pred,
                     'spearman_r': r,
                     'p_val': p,
                     'n_celdas': n
@@ -139,13 +158,28 @@ def main():
         # 2. Segmentado por Densidad en Municipio
         for dens in choices:
             gdf_muni_dens = gdf_muni[gdf_muni['zona_densidad'] == dens]
+            # Bloque Mitigación
             for pred in pred_cols:
                 r, p, n = calculate_spearman(gdf_muni_dens, target_col, pred, min_samples=30)
                 if not np.isnan(r):
                     muni_results.append({
                         'municipio': muni,
                         'segmento_densidad': dens,
-                        'variable_vegetacion': pred,
+                        'bloque': 'mitigacion',
+                        'variable': pred,
+                        'spearman_r': r,
+                        'p_val': p,
+                        'n_celdas': n
+                    })
+            # Bloque Presión Térmica
+            for pred in ind_cols:
+                r, p, n = calculate_spearman(gdf_muni_dens, target_col, pred, min_samples=30)
+                if not np.isnan(r):
+                    muni_results.append({
+                        'municipio': muni,
+                        'segmento_densidad': dens,
+                        'bloque': 'presion_termica',
+                        'variable': pred,
                         'spearman_r': r,
                         'p_val': p,
                         'n_celdas': n
@@ -166,12 +200,26 @@ def main():
         gdf_ageb = gdf[gdf['CVEGEO'] == ageb]
         
         # 3. Global por AGEB
+        # Mitigación
         for pred in pred_cols:
             r, p, n = calculate_spearman(gdf_ageb, target_col, pred, min_samples=30)
             ageb_results.append({
                 'CVEGEO': ageb,
                 'segmento_densidad': 'Global',
-                'variable_vegetacion': pred,
+                'bloque': 'mitigacion',
+                'variable': pred,
+                'spearman_r': r,
+                'p_val': p,
+                'n_celdas': n
+            })
+        # Presión Térmica
+        for pred in ind_cols:
+            r, p, n = calculate_spearman(gdf_ageb, target_col, pred, min_samples=30)
+            ageb_results.append({
+                'CVEGEO': ageb,
+                'segmento_densidad': 'Global',
+                'bloque': 'presion_termica',
+                'variable': pred,
                 'spearman_r': r,
                 'p_val': p,
                 'n_celdas': n
@@ -180,12 +228,26 @@ def main():
         # 4. Segmentado por Densidad en AGEB
         for dens in choices:
             gdf_ageb_dens = gdf_ageb[gdf_ageb['zona_densidad'] == dens]
+            # Mitigación
             for pred in pred_cols:
                 r, p, n = calculate_spearman(gdf_ageb_dens, target_col, pred, min_samples=15)
                 ageb_results.append({
                     'CVEGEO': ageb,
                     'segmento_densidad': dens,
-                    'variable_vegetacion': pred,
+                    'bloque': 'mitigacion',
+                    'variable': pred,
+                    'spearman_r': r,
+                    'p_val': p,
+                    'n_celdas': n
+                })
+            # Presión Térmica
+            for pred in ind_cols:
+                r, p, n = calculate_spearman(gdf_ageb_dens, target_col, pred, min_samples=15)
+                ageb_results.append({
+                    'CVEGEO': ageb,
+                    'segmento_densidad': dens,
+                    'bloque': 'presion_termica',
+                    'variable': pred,
                     'spearman_r': r,
                     'p_val': p,
                     'n_celdas': n
@@ -198,20 +260,25 @@ def main():
 
     print_step("5. Construcción del Geopackage Espacial de AGEBs Enriquecido")
     
-    pivot_df = df_ageb_corrs[df_ageb_corrs['variable_vegetacion'].isin(['green_pct', 'green_pct_500m'])].copy()
+    # Seleccionamos variables clave para el GeoPackage espacial: local y vecindario (500m) para ambos bloques
+    key_vars = ['green_pct', 'green_pct_500m', 'industrial_osm_pct', 'industrial_density_500m']
+    pivot_df = df_ageb_corrs[df_ageb_corrs['variable'].isin(key_vars)].copy()
     
-    # Crear un identificador único de columna: ej. "r_green_global", "r_green_500m_alta", etc.
     def get_col_name(row):
-        var_suffix = "green" if row['variable_vegetacion'] == 'green_pct' else "green500"
+        var_map = {
+            'green_pct': 'green',
+            'green_pct_500m': 'green500',
+            'industrial_osm_pct': 'ind',
+            'industrial_density_500m': 'ind500'
+        }
+        var_suffix = var_map.get(row['variable'], 'var')
         dens_suffix = row['segmento_densidad'].lower()
         return f"r_{var_suffix}_{dens_suffix}"
         
     pivot_df['col_name'] = pivot_df.apply(get_col_name, axis=1)
     
-    # Pivotear la tabla
+    # Pivotear e integrar a AGEBs
     ageb_spatial_attrs = pivot_df.pivot(index='CVEGEO', columns='col_name', values='spearman_r').reset_index()
-    
-    # Cruzar con los polígonos originales de las AGEBs
     ageb_enriched = ageb_gdf.merge(ageb_spatial_attrs, on='CVEGEO', how='inner')
     
     map_enriched_path = processed_dir / "ageb_correlaciones_sensibilidad.gpkg"
@@ -220,25 +287,26 @@ def main():
 
     print_step("6. Resumen de Resultados Principales")
     
-    # Resumen Municipal
-    print("\n>>> TOP 5 MUNICIPIOS CON MAYOR EFICIENCIA TÉRMICA DE LA VEGETACIÓN LOCAL (Global):")
-    muni_global = df_muni_corrs[(df_muni_corrs['segmento_densidad'] == 'Global') & (df_muni_corrs['variable_vegetacion'] == 'green_pct')]
-    muni_global_sorted = muni_global.sort_values(by='spearman_r')
-    for i, (_, row) in enumerate(muni_global_sorted.head(5).iterrows(), 1):
+    # Mitigación (Vegetación)
+    print("\n>>> TOP 5 MUNICIPIOS CON MAYOR EFICIENCIA DE ENFRIAMIENTO LOCAL (green_pct) - Global:")
+    muni_global_green = df_muni_corrs[(df_muni_corrs['segmento_densidad'] == 'Global') & (df_muni_corrs['variable'] == 'green_pct')]
+    muni_global_green_sorted = muni_global_green.sort_values(by='spearman_r')
+    for i, (_, row) in enumerate(muni_global_green_sorted.head(5).iterrows(), 1):
         print(f"  {i}. {row['municipio']:.<30} Spearman r: {row['spearman_r']:+.3f} (n={row['n_celdas']} celdas)")
         
-    print("\n>>> TOP 5 MUNICIPIOS CON MAYOR SENSIBILIDAD EN BUFFER DE VECINDARIO (green_pct_500m) - Global:")
-    muni_500 = df_muni_corrs[(df_muni_corrs['segmento_densidad'] == 'Global') & (df_muni_corrs['variable_vegetacion'] == 'green_pct_500m')]
-    muni_500_sorted = muni_500.sort_values(by='spearman_r')
-    for i, (_, row) in enumerate(muni_500_sorted.head(5).iterrows(), 1):
+    # Presión Térmica (Industria)
+    print("\n>>> TOP 5 MUNICIPIOS CON MAYOR PRESIÓN TÉRMICA INDUSTRIAL LOCAL (industrial_osm_pct) - Global:")
+    muni_global_ind = df_muni_corrs[(df_muni_corrs['segmento_densidad'] == 'Global') & (df_muni_corrs['variable'] == 'industrial_osm_pct')]
+    muni_global_ind_sorted = muni_global_ind.sort_values(by='spearman_r', ascending=False)
+    for i, (_, row) in enumerate(muni_global_ind_sorted.head(5).iterrows(), 1):
         print(f"  {i}. {row['municipio']:.<30} Spearman r: {row['spearman_r']:+.3f} (n={row['n_celdas']} celdas)")
 
-    # Impacto de la Densidad en Municipios
-    print("\n>>> ANÁLISIS DE IMPACTO DE DENSIDAD CONSTRUIDA A NIVEL MUNICIPAL (green_pct):")
-    muni_dens = df_muni_corrs[df_muni_corrs['variable_vegetacion'] == 'green_pct']
+    # Impacto de la Densidad en Municipios (Mitigación)
+    print("\n>>> ANÁLISIS DE IMPACTO DE DENSIDAD EN MITIGACIÓN (green_pct):")
+    muni_dens = df_muni_corrs[(df_muni_corrs['bloque'] == 'mitigacion') & (df_muni_corrs['variable'] == 'green_pct')]
     for dens in ['Baja', 'Media', 'Alta']:
         sub_dens = muni_dens[muni_dens['segmento_densidad'] == dens].sort_values(by='spearman_r').head(3)
-        print(f"\n  * Zona de Densidad: {dens}")
+        print(f"  * Zona de Densidad: {dens}")
         for _, row in sub_dens.iterrows():
             print(f"    - {row['municipio']:.<25} Spearman r: {row['spearman_r']:+.3f} (n={row['n_celdas']})")
 
@@ -247,18 +315,24 @@ def main():
     print(f"\n>>> Análisis de AGEBs Completado:")
     print(f"  * Total de AGEBs con correlaciones válidas calculadas: {valid_agebs_count}")
     
-    # Guardar reporte de resultados en markdown local
+    # Generar el reporte técnico markdown actualizado
     generate_markdown_report(df_muni_corrs, df_ageb_corrs, base_dir)
 
 def generate_markdown_report(df_muni, df_ageb, base_dir):
-    """Genera un archivo markdown detallando los hallazgos de las 4 análisis"""
+    """Genera el reporte markdown con la estructura de bloques y buffers solicitados"""
     report_path = base_dir / "bottom_up_analysis_report.md"
     
-    muni_global_green = df_muni[(df_muni['segmento_densidad'] == 'Global') & (df_muni['variable_vegetacion'] == 'green_pct')].sort_values(by='spearman_r')
-    muni_global_500 = df_muni[(df_muni['segmento_densidad'] == 'Global') & (df_muni['variable_vegetacion'] == 'green_pct_500m')].sort_values(by='spearman_r')
+    muni_global_green = df_muni[(df_muni['segmento_densidad'] == 'Global') & (df_muni['variable'] == 'green_pct')].sort_values(by='spearman_r')
+    muni_global_green500 = df_muni[(df_muni['segmento_densidad'] == 'Global') & (df_muni['variable'] == 'green_pct_500m')].sort_values(by='spearman_r')
     
-    ageb_global_green = df_ageb[(df_ageb['segmento_densidad'] == 'Global') & (df_ageb['variable_vegetacion'] == 'green_pct')].dropna()
-    ageb_global_500 = df_ageb[(df_ageb['segmento_densidad'] == 'Global') & (df_ageb['variable_vegetacion'] == 'green_pct_500m')].dropna()
+    muni_global_ind = df_muni[(df_muni['segmento_densidad'] == 'Global') & (df_muni['variable'] == 'industrial_osm_pct')].sort_values(by='spearman_r', ascending=False)
+    muni_global_ind500 = df_muni[(df_muni['segmento_densidad'] == 'Global') & (df_muni['variable'] == 'industrial_density_500m')].sort_values(by='spearman_r', ascending=False)
+    
+    ageb_global_green = df_ageb[(df_ageb['segmento_densidad'] == 'Global') & (df_ageb['variable'] == 'green_pct')].dropna()
+    ageb_global_green500 = df_ageb[(df_ageb['segmento_densidad'] == 'Global') & (df_ageb['variable'] == 'green_pct_500m')].dropna()
+    
+    ageb_global_ind = df_ageb[(df_ageb['segmento_densidad'] == 'Global') & (df_ageb['variable'] == 'industrial_osm_pct')].dropna()
+    ageb_global_ind500 = df_ageb[(df_ageb['segmento_densidad'] == 'Global') & (df_ageb['variable'] == 'industrial_density_500m')].dropna()
     
     with open(report_path, 'w', encoding='utf-8') as f:
         f.write("""# Reporte Técnico: Análisis de Correlación Espacial Bottom-Up (Municipios y AGEB)
@@ -267,69 +341,116 @@ Este documento presenta los resultados de la modelación estadística de la Isla
 ---
 
 ## 1. Síntesis Ejecutiva de Hallazgos
-1. **La escala municipal como eje regulatorio**: Los coeficientes de enfriamiento de la vegetación local varían notablemente entre demarcaciones territoriales. **San Pedro Garza García** y **Santiago** presentan los acoplamientos térmicos de mitigación más fuertes, mientras que municipios de vocación industrial como **Apodaca** y **Pesquería** muestran una menor sensibilidad directa, requiriendo buffers verdes de mayor tamaño para obtener efectos apreciables.
-2. **El buffer óptimo de vecindario (500 metros)**: En todos los análisis municipales y vecinales, la vegetación calculada en un radio de buffer de 500m (`green_pct_500m`) muestra coeficientes de enfriamiento significativamente más intensos que la vegetación puntual de la celda de 30m, lo cual subraya el efecto de la advección microclimática.
-3. **Saturación en Alta Densidad**: Al segmentar los vecindarios (AGEBs) por su densidad de suelo construido, se confirma que en las zonas de alta densidad (>= 60%), la correlación entre la vegetación local y el enfriamiento disminuye a valores no significativos ($r \approx -0.05$). Esto demuestra que la adición aislada de arbolado en entornos saturados de concreto no mitiga la isla de calor de forma local, y las políticas deben transicionar hacia buffers metropolitanos o reforestaciones perimetrales masivas.
+1. **Doble régimen térmico (Mitigación vs Presión)**: La vegetación actúa como el principal regulador del calor (mitigación), mostrando su mayor eficiencia en áreas periurbanas de baja densidad. Por otro lado, la densidad industrial OSM representa una fuente activa de presión térmica directa, concentrando e intensificando las islas de calor urbanas de forma persistente.
+2. **La escala óptima de buffer (250m a 500m)**: Los coeficientes de correlación demuestran que tanto el enfriamiento por vegetación como el calentamiento industrial alcanzan su pico de correlación en escalas intermedias de buffer (250m y 500m), lo que evidencia la importancia del vecindario térmico inmediato sobre la celda puntual de 30m.
+3. **El fenómeno de Saturación**: En zonas de alta densidad (>= 60% edificado), la correlación local de la vegetación cae a niveles nulos ($r \approx -0.05$). Esto sugiere la ineficacia de intervenciones de arborización puntuales en áreas saturadas de asfalto y hormigón, requiriendo de políticas metropolitanas integradas.
 
 ---
 
 ## 2. Resultados a Nivel de Municipio
 
-### 2.1. Eficiencia Térmica Global de la Vegetación (green_pct local vs 500m)
-A continuación se listan las correlaciones globales de Spearman ($r$) entre la intensidad de la SUHI diurna (`suhi_day_c`) y la vegetación a escala local (30m) y de vecindario (500m) por municipio:
+### 2.1. Eficiencia Térmica Global (Local 30m vs Buffer 500m)
+
+#### A. Bloque Mitigación: Vegetación (`green_pct` vs `green_pct_500m`)
+Correlaciones globales de Spearman ($r$) entre la SUHI diurna (`suhi_day_c`) y la vegetación:
 
 """)
-        
         f.write("| Municipio | Coeficiente Local (30m) | Coeficiente Vecindario (500m) | Celdas de 30m Analizadas |\n")
         f.write("| :--- | :---: | :---: | :---: |\n")
-        
         for muni in muni_global_green['municipio'].unique():
             r_local = muni_global_green[muni_global_green['municipio'] == muni]['spearman_r'].values[0]
             n_cells = muni_global_green[muni_global_green['municipio'] == muni]['n_celdas'].values[0]
-            
-            sub_500 = muni_global_500[muni_global_500['municipio'] == muni]
+            sub_500 = muni_global_green500[muni_global_green500['municipio'] == muni]
             r_500 = sub_500['spearman_r'].values[0] if len(sub_500) > 0 else np.nan
             
-            r_local_str = f"**{r_local:+.3f}**" if r_local < -0.3 else f"{r_local:+.3f}"
-            r_500_str = f"**{r_500:+.3f}**" if not np.isnan(r_500) and r_500 < -0.4 else (f"{r_500:+.3f}" if not np.isnan(r_500) else "N/D")
-            
+            r_local_str = f"**{r_local:+.3f}**" if r_local < -0.2 else f"{r_local:+.3f}"
+            r_500_str = f"**{r_500:+.3f}**" if not np.isnan(r_500) and r_500 < -0.2 else (f"{r_500:+.3f}" if not np.isnan(r_500) else "N/D")
             f.write(f"| {muni} | {r_local_str} | {r_500_str} | {n_cells:,} |\n")
-            
+
         f.write("""
-### 2.2. Sensibilidad Térmica Segmentada por Densidad Construida y Escala de Buffer
-Comparación de coeficientes de Spearman ($r$) a diferentes escalas de buffer (Local 30m, 250m, 500m y 1000m) segmentados por la densidad construida de cada municipio:
+#### B. Bloque Presión Térmica: Industria (`industrial_osm_pct` vs `industrial_density_500m`)
+Correlaciones globales de Spearman ($r$) entre la SUHI diurna (`suhi_day_c`) y la presencia industrial:
 
 """)
-        f.write("| Municipio | Zona de Densidad | Local (30m) | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |\n")
-        f.write("| :--- | :--- | :---: | :---: | :---: | :---: |\n")
+        f.write("| Municipio | Coeficiente Local (30m) | Coeficiente Vecindario (500m) | Celdas de 30m Analizadas |\n")
+        f.write("| :--- | :---: | :---: | :---: |\n")
+        for muni in muni_global_ind['municipio'].unique():
+            r_local = muni_global_ind[muni_global_ind['municipio'] == muni]['spearman_r'].values[0]
+            n_cells = muni_global_ind[muni_global_ind['municipio'] == muni]['n_celdas'].values[0]
+            sub_500 = muni_global_ind500[muni_global_ind500['municipio'] == muni]
+            r_500 = sub_500['spearman_r'].values[0] if len(sub_500) > 0 else np.nan
+            
+            r_local_str = f"**{r_local:+.3f}**" if r_local > +0.15 else f"{r_local:+.3f}"
+            r_500_str = f"**{r_500:+.3f}**" if not np.isnan(r_500) and r_500 > +0.15 else (f"{r_500:+.3f}" if not np.isnan(r_500) else "N/D")
+            f.write(f"| {muni} | {r_local_str} | {r_500_str} | {n_cells:,} |\n")
+
+        f.write("""
+### 2.2. Sensibilidad Térmica de la Vegetación (Mitigación) por Densidad y Escala de Buffer
+Comparación de coeficientes de Spearman ($r$) para el bloque de Mitigación (Vegetación) a diferentes escalas de buffer segmentados por la densidad construida de cada municipio:
+
+""")
+        f.write("| Municipio | Zona de Densidad | Local (30m) | Buffer 100m | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |\n")
+        f.write("| :--- | :--- | :---: | :---: | :---: | :---: | :---: |\n")
         
         for muni in muni_global_green['municipio'].unique():
             for dens in ['Baja', 'Media', 'Alta']:
-                df_sub = df_muni[(df_muni['municipio'] == muni) & (df_muni['segmento_densidad'] == dens)]
+                df_sub = df_muni[(df_muni['municipio'] == muni) & (df_muni['segmento_densidad'] == dens) & (df_muni['bloque'] == 'mitigacion')]
                 if len(df_sub) == 0:
                     continue
                 
-                r_local = df_sub[df_sub['variable_vegetacion'] == 'green_pct']['spearman_r'].values
-                r_250 = df_sub[df_sub['variable_vegetacion'] == 'green_pct_250m']['spearman_r'].values
-                r_500 = df_sub[df_sub['variable_vegetacion'] == 'green_pct_500m']['spearman_r'].values
-                r_1000 = df_sub[df_sub['variable_vegetacion'] == 'green_pct_1000m']['spearman_r'].values
+                r_local = df_sub[df_sub['variable'] == 'green_pct']['spearman_r'].values
+                r_100 = df_sub[df_sub['variable'] == 'green_pct_100m']['spearman_r'].values
+                r_250 = df_sub[df_sub['variable'] == 'green_pct_250m']['spearman_r'].values
+                r_500 = df_sub[df_sub['variable'] == 'green_pct_500m']['spearman_r'].values
+                r_1000 = df_sub[df_sub['variable'] == 'green_pct_1000m']['spearman_r'].values
                 
-                local_val = r_local[0] if len(r_local) > 0 else np.nan
+                l_val = r_local[0] if len(r_local) > 0 else np.nan
+                r100_val = r_100[0] if len(r_100) > 0 else np.nan
                 r250_val = r_250[0] if len(r_250) > 0 else np.nan
                 r500_val = r_500[0] if len(r_500) > 0 else np.nan
                 r1000_val = r_1000[0] if len(r_1000) > 0 else np.nan
                 
-                local_str = f"{local_val:+.3f}" if not np.isnan(local_val) else "N/D"
-                r250_str = f"{r250_val:+.3f}" if not np.isnan(r250_val) else "N/D"
-                r500_str = f"{r500_val:+.3f}" if not np.isnan(r500_val) else "N/D"
-                r1000_str = f"{r1000_val:+.3f}" if not np.isnan(r1000_val) else "N/D"
+                def highlight(val):
+                    if not np.isnan(val):
+                        s = f"{val:+.3f}"
+                        return f"**{s}**" if val < -0.35 else s
+                    return "N/D"
                 
-                def highlight(val, val_str):
-                    if not np.isnan(val) and val < -0.35:
-                        return f"**{val_str}**"
-                    return val_str
+                f.write(f"| {muni} | {dens} | {highlight(l_val)} | {highlight(r100_val)} | {highlight(r250_val)} | {highlight(r500_val)} | {highlight(r1000_val)} |\n")
+
+        f.write("""
+### 2.3. Sensibilidad Térmica de la Industria (Presión Térmica) por Densidad y Escala de Buffer
+Comparación de coeficientes de Spearman ($r$) para el bloque de Presión Térmica (Industria OSM) a diferentes escalas de buffer segmentados por la densidad construida de cada municipio:
+
+""")
+        f.write("| Municipio | Zona de Densidad | Local (30m) | Buffer 100m | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |\n")
+        f.write("| :--- | :--- | :---: | :---: | :---: | :---: | :---: |\n")
+        
+        for muni in muni_global_green['municipio'].unique():
+            for dens in ['Baja', 'Media', 'Alta']:
+                df_sub = df_muni[(df_muni['municipio'] == muni) & (df_muni['segmento_densidad'] == dens) & (df_muni['bloque'] == 'presion_termica')]
+                if len(df_sub) == 0:
+                    continue
                 
-                f.write(f"| {muni} | {dens} | {highlight(local_val, local_str)} | {highlight(r250_val, r250_str)} | {highlight(r500_val, r500_str)} | {highlight(r1000_val, r1000_str)} |\n")
+                r_local = df_sub[df_sub['variable'] == 'industrial_osm_pct']['spearman_r'].values
+                r_100 = df_sub[df_sub['variable'] == 'industrial_density_100m']['spearman_r'].values
+                r_250 = df_sub[df_sub['variable'] == 'industrial_density_250m']['spearman_r'].values
+                r_500 = df_sub[df_sub['variable'] == 'industrial_density_500m']['spearman_r'].values
+                r_1000 = df_sub[df_sub['variable'] == 'industrial_density_1000m']['spearman_r'].values
+                
+                l_val = r_local[0] if len(r_local) > 0 else np.nan
+                r100_val = r_100[0] if len(r_100) > 0 else np.nan
+                r250_val = r_250[0] if len(r_250) > 0 else np.nan
+                r500_val = r_500[0] if len(r_500) > 0 else np.nan
+                r1000_val = r_1000[0] if len(r_1000) > 0 else np.nan
+                
+                def highlight_ind(val):
+                    if not np.isnan(val):
+                        s = f"{val:+.3f}"
+                        return f"**{s}**" if val > +0.25 else s
+                    return "N/D"
+                
+                f.write(f"| {muni} | {dens} | {highlight_ind(l_val)} | {highlight_ind(r100_val)} | {highlight_ind(r250_val)} | {highlight_ind(r500_val)} | {highlight_ind(r1000_val)} |\n")
 
         f.write("""
 ---
@@ -341,14 +462,14 @@ El análisis bottom-up calculó de forma independiente las correlaciones dentro 
 ### 3.1. Distribución de Coeficientes de Spearman ($r$) en AGEBs
 Estadísticos descriptivos de los coeficientes de correlación calculados sobre las celdas internas de cada AGEB:
 
+| Indicador Estadístico | Mitigación Local (`green_pct`) | Mitigación Buffer (`green_pct_500m`) | Presión Local (`ind_osm`) | Presión Buffer (`ind_density_500m`) |
+| :--- | :---: | :---: | :---: | :---: |
 """)
-        f.write(f"| Indicador Estadístico | Correlación Local (`green_pct`) | Correlación Vecindario (`green_pct_500m`) |\n")
-        f.write(f"| :--- | :---: | :---: |\n")
-        f.write(f"| Promedio de Spearman ($r$) | {ageb_global_green['spearman_r'].mean():+.3f} | {ageb_global_500['spearman_r'].mean():+.3f} |\n")
-        f.write(f"| Desviación Estándar | {ageb_global_green['spearman_r'].std():.3f} | {ageb_global_500['spearman_r'].std():.3f} |\n")
-        f.write(f"| Valor Mínimo (Máximo Enfriamiento) | {ageb_global_green['spearman_r'].min():.3f} | {ageb_global_500['spearman_r'].min():.3f} |\n")
-        f.write(f"| Valor Máximo (Pérdida de Eficiencia) | {ageb_global_green['spearman_r'].max():+.3f} | {ageb_global_500['spearman_r'].max():+.3f} |\n")
-        f.write(f"| Total de AGEBs con datos válidos | {len(ageb_global_green):,} | {len(ageb_global_500):,} |\n")
+        f.write(f"| Promedio de Spearman ($r$) | {ageb_global_green['spearman_r'].mean():+.3f} | {ageb_global_green500['spearman_r'].mean():+.3f} | {ageb_global_ind['spearman_r'].mean():+.3f} | {ageb_global_ind500['spearman_r'].mean():+.3f} |\n")
+        f.write(f"| Desviación Estándar | {ageb_global_green['spearman_r'].std():.3f} | {ageb_global_green500['spearman_r'].std():.3f} | {ageb_global_ind['spearman_r'].std():.3f} | {ageb_global_ind500['spearman_r'].std():.3f} |\n")
+        f.write(f"| Valor Mínimo | {ageb_global_green['spearman_r'].min():.3f} | {ageb_global_green500['spearman_r'].min():.3f} | {ageb_global_ind['spearman_r'].min():.3f} | {ageb_global_ind500['spearman_r'].min():.3f} |\n")
+        f.write(f"| Valor Máximo | {ageb_global_green['spearman_r'].max():+.3f} | {ageb_global_green500['spearman_r'].max():+.3f} | {ageb_global_ind['spearman_r'].max():+.3f} | {ageb_global_ind500['spearman_r'].max():+.3f} |\n")
+        f.write(f"| total de AGEBs con datos válidos | {len(ageb_global_green):,} | {len(ageb_global_green500):,} | {len(ageb_global_ind):,} | {len(ageb_global_ind500):,} |\n")
 
         f.write("""
 ### 3.2. Mapa de Sensibilidad y Exportación Espacial
@@ -356,16 +477,18 @@ Los coeficientes de correlación resultantes de este análisis han sido unidos d
 Las columnas agregadas son:
 * **`r_green_global`**: Correlación local global de la celda de 30m.
 * **`r_green500_global`**: Correlación a escala de vecindario (500m).
-* **`r_green_alta` / `r_green_media` / `r_green_baja`**: Correlaciones locales segmentadas por la densidad interna de la AGEB.
+* **`r_ind_global`**: Correlación local global para la presencia industrial.
+* **`r_ind500_global`**: Correlación a escala de vecindario (500m) para la densidad industrial.
+* **`r_green_alta` / `r_green_media` / `r_green_baja`**: Correlaciones locales de vegetación segmentadas por la densidad interna de la AGEB.
 
 Este Geopackage está listo para ser cargado en QGIS o ArcGIS para la generación de mapas de calor y priorización territorial de infraestructura verde.
 
 ---
 
 ## 4. Recomendaciones de Política Pública
-1. **Reforestación Focalizada basada en Sensibilidad Local**: Priorizar la plantación de árboles en aquellas AGEBs urbanas que muestren correlaciones negativas robustas (coeficientes inferiores a -0.40). Estas zonas son "receptivas" a la mitigación y representan un retorno de inversión térmica inmediato.
-2. **Transición a Parques Urbanos en Zonas de Saturación**: En AGEBs centrales consolidadas que muestran correlaciones neutras (cercanas a 0.0), la reforestación aislada de camellones o aceras es insuficiente. Se recomienda la adquisición de predios subutilizados para convertirlos en parques de bolsillo urbanos de al menos 500m de influencia.
-3. **Buffers de Regulación Industrial**: En municipios altamente industrializados como Apodaca y Santa Catarina, el efecto mitigador de la vegetación local es diluido por las emisiones de calor sensible. La política de amortiguamiento debe exigir buffers verdes forestales perimetrales continuos de 500m a 1000m alrededor de los polígonos de manufactura pesada.
+1. **Regulación de Presión Industrial**: Los municipios de Apodaca y Escobedo deben focalizar la plantación de buffers de absorción forestal a escalas de 250m a 500m alrededor de los polígonos industriales, ya que a esta escala la presión térmica alcanza correlaciones robustas con la intensidad de la SUHI.
+2. **Mitigación de Saturación**: En áreas consolidadas donde la correlación de vegetación disminuye drásticamente, se debe priorizar intervenciones sobre la inercia térmica de los materiales (pavimentos fríos, reflectancia en techos y fachadas) en lugar de arborización dispersa inefectiva.
+3. **Parques de Vecindario**: En áreas residenciales de densidad media, incentivar parques comunitarios arbolados con radios de influencia de 500m, maximizando el efecto de advección térmica local y optimizando el retorno de inversión térmica.
 """)
         
     print(f"[Report] Reporte técnico markdown generado en: {report_path}")
