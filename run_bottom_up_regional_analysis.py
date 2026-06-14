@@ -296,25 +296,40 @@ A continuación se listan las correlaciones globales de Spearman ($r$) entre la 
             f.write(f"| {muni} | {r_local_str} | {r_500_str} | {n_cells:,} |\n")
             
         f.write("""
-### 2.2. Sensibilidad Térmica Segmentada por Densidad Construida
-Análisis del impacto térmico de la vegetación local (`green_pct`) segmentado por la densidad de concreto municipal:
+### 2.2. Sensibilidad Térmica Segmentada por Densidad Construida y Escala de Buffer
+Comparación de coeficientes de Spearman ($r$) a diferentes escalas de buffer (Local 30m, 250m, 500m y 1000m) segmentados por la densidad construida de cada municipio:
 
 """)
-        f.write("| Municipio | Densidad Baja (<20%) | Densidad Media (20-60%) | Densidad Alta (>=60%) |\n")
-        f.write("| :--- | :---: | :---: | :---: |\n")
+        f.write("| Municipio | Zona de Densidad | Local (30m) | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |\n")
+        f.write("| :--- | :--- | :---: | :---: | :---: | :---: |\n")
         
         for muni in muni_global_green['municipio'].unique():
-            df_muni_sub = df_muni[(df_muni['municipio'] == muni) & (df_muni['variable_vegetacion'] == 'green_pct')]
-            
-            r_baja = df_muni_sub[df_muni_sub['segmento_densidad'] == 'Baja']['spearman_r'].values
-            r_media = df_muni_sub[df_muni_sub['segmento_densidad'] == 'Media']['spearman_r'].values
-            r_alta = df_muni_sub[df_muni_sub['segmento_densidad'] == 'Alta']['spearman_r'].values
-            
-            baja_str = f"{r_baja[0]:+.3f}" if len(r_baja) > 0 else "N/D"
-            media_str = f"{r_media[0]:+.3f}" if len(r_media) > 0 else "N/D"
-            alta_str = f"{r_alta[0]:+.3f}" if len(r_alta) > 0 else "N/D"
-            
-            f.write(f"| {muni} | {baja_str} | {media_str} | {alta_str} |\n")
+            for dens in ['Baja', 'Media', 'Alta']:
+                df_sub = df_muni[(df_muni['municipio'] == muni) & (df_muni['segmento_densidad'] == dens)]
+                if len(df_sub) == 0:
+                    continue
+                
+                r_local = df_sub[df_sub['variable_vegetacion'] == 'green_pct']['spearman_r'].values
+                r_250 = df_sub[df_sub['variable_vegetacion'] == 'green_pct_250m']['spearman_r'].values
+                r_500 = df_sub[df_sub['variable_vegetacion'] == 'green_pct_500m']['spearman_r'].values
+                r_1000 = df_sub[df_sub['variable_vegetacion'] == 'green_pct_1000m']['spearman_r'].values
+                
+                local_val = r_local[0] if len(r_local) > 0 else np.nan
+                r250_val = r_250[0] if len(r_250) > 0 else np.nan
+                r500_val = r_500[0] if len(r_500) > 0 else np.nan
+                r1000_val = r_1000[0] if len(r_1000) > 0 else np.nan
+                
+                local_str = f"{local_val:+.3f}" if not np.isnan(local_val) else "N/D"
+                r250_str = f"{r250_val:+.3f}" if not np.isnan(r250_val) else "N/D"
+                r500_str = f"{r500_val:+.3f}" if not np.isnan(r500_val) else "N/D"
+                r1000_str = f"{r1000_val:+.3f}" if not np.isnan(r1000_val) else "N/D"
+                
+                def highlight(val, val_str):
+                    if not np.isnan(val) and val < -0.35:
+                        return f"**{val_str}**"
+                    return val_str
+                
+                f.write(f"| {muni} | {dens} | {highlight(local_val, local_str)} | {highlight(r250_val, r250_str)} | {highlight(r500_val, r500_str)} | {highlight(r1000_val, r1000_str)} |\n")
 
         f.write("""
 ---

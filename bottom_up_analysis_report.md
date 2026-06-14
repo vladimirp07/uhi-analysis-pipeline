@@ -22,15 +22,23 @@ A continuación se listan las correlaciones globales de Spearman ($r$) entre la 
 | San Nicolás de los Garza | -0.088 | -0.098 | 26,009 |
 | Monterrey | -0.068 | +0.007 | 107,744 |
 
-### 2.2. Sensibilidad Térmica Segmentada por Densidad Construida
-Análisis del impacto térmico de la vegetación local (`green_pct`) segmentado por la densidad de concreto municipal:
+### 2.2. Sensibilidad Térmica Segmentada por Densidad Construida y Escala de Buffer
+Comparación de coeficientes de Spearman ($r$) a diferentes escalas de buffer (Local 30m, 250m, 500m y 1000m) segmentados por la densidad construida de cada municipio:
 
-| Municipio | Densidad Baja (<20%) | Densidad Media (20-60%) | Densidad Alta (>=60%) |
-| :--- | :---: | :---: | :---: |
-| San Pedro Garza García | -0.781 | -0.319 | -0.116 |
-| Guadalupe | -0.278 | -0.150 | -0.042 |
-| San Nicolás de los Garza | -0.536 | -0.091 | -0.083 |
-| Monterrey | -0.489 | -0.133 | -0.026 |
+| Municipio | Zona de Densidad | Local (30m) | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| San Pedro Garza García | Baja | **-0.781** | **-0.806** | **-0.779** | **-0.720** |
+| San Pedro Garza García | Media | -0.319 | -0.278 | -0.171 | -0.121 |
+| San Pedro Garza García | Alta | -0.116 | -0.202 | -0.170 | -0.133 |
+| Guadalupe | Baja | -0.278 | **-0.645** | **-0.644** | **-0.676** |
+| Guadalupe | Media | -0.150 | -0.255 | -0.190 | -0.104 |
+| Guadalupe | Alta | -0.042 | +0.037 | +0.114 | +0.335 |
+| San Nicolás de los Garza | Baja | **-0.536** | **-0.632** | **-0.674** | **-0.618** |
+| San Nicolás de los Garza | Media | -0.091 | -0.138 | -0.135 | -0.086 |
+| San Nicolás de los Garza | Alta | -0.083 | -0.120 | -0.079 | +0.044 |
+| Monterrey | Baja | **-0.489** | **-0.611** | **-0.522** | -0.140 |
+| Monterrey | Media | -0.133 | -0.162 | -0.137 | -0.069 |
+| Monterrey | Alta | -0.026 | +0.028 | +0.063 | +0.120 |
 
 ---
 
