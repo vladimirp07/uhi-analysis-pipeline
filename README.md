@@ -240,37 +240,3 @@ Una vez que se reemplace la base de datos censal por el **CSV completo de 230 co
 2.  **Riqueza y Bienes (`VPH_AUTOMOV` y `VPH_INTERNET`):** *Porcentaje de viviendas con automóvil o acceso a Internet*. Actúan como indicadores directos de ingresos familiares medios y altos en la ZMM.
 3.  **Pobreza Extrema e Infraestructura (`VPH_ND_HU`):** *Porcentaje de viviendas particulares habitadas que no disponen de energía eléctrica, agua entubada ni drenaje*. Identifica directamente núcleos de pobreza extrema y precariedad habitacional extrema ante olas de calor.
 4.  **Vulnerabilidad Laboral (`PDER_SS`):** *Porcentaje de población sin afiliación a servicios de salud*. Identifica sectores con empleo informal y menores recursos para solventar complicaciones de salud derivadas del calor extremo.
-
----
-
-## 6. Hoja de Ruta de Correcciones (Roadmap)
-
-A continuación, se detalla la hoja de ruta para la depuración y consolidación del MVP, priorizada por nivel de criticidad técnica:
-
-### 🔴 Criticidad Alta (Bloqueante para el Análisis Completo)
-*   **Reemplazo del Archivo de Censo Truncado:**
-    *   *Problema:* El archivo actual `RESAGEBURB2020 - 19 Nuevo León (1).csv` está truncado a la línea 30,000 y limitado a 62 columnas. Esto causa la pérdida de información para el 60% del estado (incluyendo más del 55% de las AGEB de Monterrey) y omite todas las variables de vivienda e ingresos del censo.
-    *   *Corrección:* Descargar el archivo CSV completo para Nuevo León desde el portal oficial de INEGI y guardarlo en `data/raw/` con el mismo nombre, asegurando que contenga las más de 80,000 filas y las 230+ columnas del censo.
-
-### 🟡 Criticidad Media (Mejora y Rigurosidad del Modelo)
-*   **Integración de Proxies de Ingresos y Pobreza:**
-    *   *Problema:* El modelo actual de vulnerabilidad socioambiental solo incluye índices demográficos por grupos de edad, omitiendo la dimensión de desigualdad económica y de infraestructura en las viviendas.
-    *   *Corrección:* Modificar el módulo `src/ageb_social.py` para extraer, normalizar y calcular los promedios/tasas de `GRAPROES` (grado de escolaridad), `VPH_AUTOMOV` (indicador de riqueza familiar), `VPH_ND_HU` (pobreza extrema habitacional) y `PDER_SS` (informalidad laboral) a nivel de AGEB una vez reemplazado el censo completo.
-
-### 🟢 Criticidad Baja (Precisión y Enriquecimiento de Capas)
-*   **Migración de Capas Industriales de OSM a DENUE (INEGI):**
-    *   *Problema:* Los polígonos industriales obtenidos de OpenStreetMap (`industrial_osm_pct`) dependen de la digitalización colaborativa de voluntarios, lo que puede causar desfases de actualización en periferias urbanas y clasifica erróneamente naves de almacenamiento logístico (no emisores térmicos) como industria activa.
-    *   *Corrección:* Reemplazar la descarga de OSM por la base de datos oficial del DENUE (INEGI), filtrando establecimientos industriales activos de manufactura pesada a través de códigos SCIAN específicos y modelando buffers de calor antropogénico basados en número de empleados.
-
----
-
-## 7. Siguientes Pasos (Evolución Científica)
-
-Para la evolución metodológica del pipeline hacia un modelo científico y de planificación urbana avanzado, se proponen los siguientes pasos:
-
-1.  **Mapeo de Clústeres de Calor (Moran's I & LISA):**
-    Implementar en `src/stats.py` rutinas para calcular la autocorrelación espacial de la SUHI. Esto permitirá delimitar estadísticamente **Hotspots** (islas de calor significativas) y **Coldspots** (zonas de amortiguamiento o enfriamiento térmico regular), superando las limitaciones de las correlaciones asociales simples de Spearman.
-2.  **Modelado de Regresión Geográficamente Ponderada (GWR):**
-    Transicionar de correlaciones globales a modelos **GWR**, lo que permitirá determinar cómo la capacidad de mitigación térmica de los árboles (`dw_trees_pct`) varía espacialmente en función del sector geográfico de la Zona Metropolitana de Monterrey.
-3.  **Desarrollo del Índice de Vulnerabilidad Térmica (TVI):**
-    Construir un mapa de vulnerabilidad integrado superponiendo el peligro físico (anomalías de la intensidad de la **SUHI**) con la sensibilidad social (tasas de pobreza extrema, analfabetismo y densidad de población de adultos mayores). Esto permitirá priorizar las intervenciones de reforestación urbana en los sectores más críticos de la ZMM.
