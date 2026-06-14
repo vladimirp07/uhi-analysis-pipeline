@@ -4,17 +4,17 @@ Este documento presenta los resultados de la modelación estadística de la Isla
 ---
 
 ## 1. Síntesis Ejecutiva de Hallazgos
-1. **Doble régimen térmico (Mitigación vs Presión)**: La vegetación actúa como el principal regulador del calor (mitigación), mostrando su mayor eficiencia en áreas periurbanas de baja densidad. Por otro lado, la densidad industrial OSM representa una fuente activa de presión térmica directa, concentrando e intensificando las islas de calor urbanas de forma persistente.
-2. **La escala óptima de buffer (250m a 500m)**: Los coeficientes de correlación demuestran que tanto el enfriamiento por vegetación como el calentamiento industrial alcanzan su pico de correlación en escalas intermedias de buffer (250m y 500m), lo que evidencia la importancia del vecindario térmico inmediato sobre la celda puntual de 30m.
-3. **El fenómeno de Saturación**: En zonas de alta densidad (>= 60% edificado), la correlación local de la vegetación cae a niveles nulos ($r pprox -0.05$). Esto sugiere la ineficacia de intervenciones de arborización puntuales en áreas saturadas de asfalto y hormigón, requiriendo de políticas metropolitanas integradas.
+1. **Diferenciación de Regímenes Térmicos**: La vegetación muestra asociaciones negativas consistentes con la intensidad de la SUHI (asociación biofísica de enfriamiento), principalmente en áreas periurbanas de baja densidad. Por el contrario, la densidad de zonas industriales exhibe fuertes asociaciones positivas con las anomalías térmicas (presión de calor).
+2. **Escalas de Asociación Variable**: Los resultados muestran que las asociaciones más intensas tienden a aparecer en escalas intermedias y amplias, especialmente entre 250 m y 1000 m, aunque la escala dominante cambia según municipio, densidad y tipo de variable.
+3. **Efecto de Saturación en Áreas Densas**: Al segmentar los vecindarios (AGEBs) por su densidad de suelo construido, se confirma que en las zonas de alta densidad (>= 60%), la correlación negativa entre la vegetación local y la SUHI diurna disminuye a valores estadísticamente no significativos ($r \approx -0.05$). Esto sugiere que en entornos saturados de concreto, la reforestación aislada no muestra asociación estadística con la reducción de la temperatura superficial.
 
 ---
 
 ## 2. Resultados a Nivel de Municipio
 
-### 2.1. Eficiencia Térmica Global (Local 30m vs Buffer 500m)
+### 2.1. Asociación Térmica Global (Local 30m vs Buffer 500m)
 
-#### A. Bloque Mitigación: Vegetación (`green_pct` vs `green_pct_500m`)
+#### A. Bloque Asociación Biofísica de Enfriamiento: Vegetación (`green_pct` vs `green_pct_500m`)
 Correlaciones globales de Spearman ($r$) entre la SUHI diurna (`suhi_day_c`) y la vegetación:
 
 | Municipio | Coeficiente Local (30m) | Coeficiente Vecindario (500m) | Celdas de 30m Analizadas |
@@ -24,7 +24,7 @@ Correlaciones globales de Spearman ($r$) entre la SUHI diurna (`suhi_day_c`) y l
 | San Nicolás de los Garza | -0.088 | -0.098 | 26,009 |
 | Monterrey | -0.068 | +0.007 | 107,744 |
 
-#### B. Bloque Presión Térmica: Industria (`industrial_osm_pct` vs `industrial_density_500m`)
+#### B. Bloque Asociación Térmica de Calentamiento: Industria (`industrial_osm_pct` vs `industrial_density_500m`)
 Correlaciones globales de Spearman ($r$) entre la SUHI diurna (`suhi_day_c`) y la presencia industrial:
 
 | Municipio | Coeficiente Local (30m) | Coeficiente Vecindario (500m) | Celdas de 30m Analizadas |
@@ -34,7 +34,7 @@ Correlaciones globales de Spearman ($r$) entre la SUHI diurna (`suhi_day_c`) y l
 | Guadalupe | +0.001 | -0.177 | 21,320 |
 | San Pedro Garza García | -0.006 | +0.013 | 23,217 |
 
-### 2.2. Sensibilidad Térmica de la Vegetación (Mitigación) por Densidad y Escala de Buffer
+### 2.2. Coeficientes de Vegetación (Mitigación) por Densidad y Escala de Buffer
 Comparación de coeficientes de Spearman ($r$) para el bloque de Mitigación (Vegetación) a diferentes escalas de buffer segmentados por la densidad construida de cada municipio:
 
 | Municipio | Zona de Densidad | Local (30m) | Buffer 100m | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |
@@ -52,7 +52,7 @@ Comparación de coeficientes de Spearman ($r$) para el bloque de Mitigación (Ve
 | Monterrey | Media | -0.133 | -0.179 | -0.162 | -0.137 | -0.069 |
 | Monterrey | Alta | -0.026 | -0.022 | +0.028 | +0.063 | +0.120 |
 
-### 2.3. Sensibilidad Térmica de la Industria (Presión Térmica) por Densidad y Escala de Buffer
+### 2.3. Coeficientes de la Industria (Presión Térmica) por Densidad y Escala de Buffer
 Comparación de coeficientes de Spearman ($r$) para el bloque de Presión Térmica (Industria OSM) a diferentes escalas de buffer segmentados por la densidad construida de cada municipio:
 
 | Municipio | Zona de Densidad | Local (30m) | Buffer 100m | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |
@@ -100,7 +100,14 @@ Este Geopackage está listo para ser cargado en QGIS o ArcGIS para la generació
 
 ---
 
-## 4. Recomendaciones de Política Pública
-1. **Regulación de Presión Industrial**: Los municipios de Apodaca y Escobedo deben focalizar la plantación de buffers de absorción forestal a escalas de 250m a 500m alrededor de los polígonos industriales, ya que a esta escala la presión térmica alcanza correlaciones robustas con la intensidad de la SUHI.
-2. **Mitigación de Saturación**: En áreas consolidadas donde la correlación de vegetación disminuye drásticamente, se debe priorizar intervenciones sobre la inercia térmica de los materiales (pavimentos fríos, reflectancia en techos y fachadas) en lugar de arborización dispersa inefectiva.
-3. **Parques de Vecindario**: En áreas residenciales de densidad media, incentivar parques comunitarios arbolados con radios de influencia de 500m, maximizando el efecto de advección térmica local y optimizando el retorno de inversión térmica.
+## 4. Recomendaciones de Política Pública e Intervenciones Urbanas
+
+1. **Gestión de la Presión Industrial y Amortiguamiento Intermunicipal**:
+   Los municipios con una fuerte asociación positiva entre la SUHI y la presencia industrial en escalas locales e intermedias (como **San Nicolás de los Garza** y zonas específicas de **Monterrey**) deben priorizar la implementación de buffers de absorción forestal a escalas de 250 m a 500 m adyacentes a sus polígonos industriales. 
+   Para el caso de **San Pedro Garza García**, la fuerte correlación positiva observada en buffers amplios (500 m y 1000 m) en zonas de baja y media densidad no corresponde a zonas industriales locales (ya que el municipio tiene un uso de suelo predominantemente residencial y comercial), sino a un **efecto de colindancia o desbordamiento espacial (*spatial spillover*)**. El buffer de 1000 m captura el corredor industrial del eje Díaz Ordaz en Santa Catarina y áreas industriales limítrofes de Monterrey, demostrando que la presión térmica industrial trasciende fronteras municipales. Esto sugiere que las políticas de amortiguamiento y control térmico industrial deben coordinarse a nivel metropolitano.
+
+2. **Acción Diferenciada en Zonas de Alta Densidad (Materialidad vs. Vegetación)**:
+   En áreas urbanas altamente consolidadas (densidad construida $\ge 60\%$) de los cuatro municipios analizados, la correlación negativa entre la vegetación local y la SUHI diurna tiende a ser cercana a cero ($r \approx -0.05$). Esto sugiere que en entornos saturados de concreto, la arborización dispersa tiene una asociación estadística muy débil con el enfriamiento superficial. En estas zonas se debe priorizar la mitigación pasiva mediante la modificación de la materialidad urbana (aumento de albedo en techos, fachadas y pavimentos fríos) para contrarrestar la inercia térmica.
+
+3. **Planificación de Infraestructura Verde a Escala de Vecindario**:
+   En áreas residenciales de densidad media, la asociación biofísica negativa con la vegetación es más intensa a escalas de vecindario (buffers de 250 m a 500 m) que a escala local inmediata (30 m). Por ende, las estrategias de arborización urbana deben estructurarse en torno a parques de vecindario distribuidos que cubran un radio de influencia de hasta 500 m, maximizando así la correlación con la disminución del calor superficial acumulado.
