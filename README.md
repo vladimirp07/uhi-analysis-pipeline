@@ -1,242 +1,107 @@
-# MVP: Pipeline de Análisis Multitemporal de Islas de Calor Urbanas Superficiales (SUHI) en Monterrey (2026)
+# Pipeline de Análisis Multitemporal de Islas de Calor Urbanas Superficiales (SUHI) en Monterrey (2026)
 
-## 1. Introducción y Contexto
+Este repositorio alberga el **Producto Mínimo Viable (MVP) v1** del pipeline de análisis geoespacial, biofísico y socioambiental de la **Isla de Calor Urbana Superficial (SUHI - Surface Urban Heat Island)** en la Zona Metropolitana de Monterrey (ZMM) para el año **2026**.
 
-Este repositorio alberga el **Producto Mínimo Viable (MVP) v1** del pipeline de análisis geoespacial y biofísico de la **Isla de Calor Urbana Superficial (SUHI - Surface Urban Heat Island)** en la Zona Metropolitana de Monterrey para el año **2026**. 
-
-### El Fenómeno SUHI como Eje Central
-A diferencia de los estudios simplificados de temperatura absoluta, este proyecto se enfoca en la **SUHI (Intensidad de la Isla de Calor)**, la cual se define como la **anomalía térmica espacial** generada por la urbanización. La temperatura de la superficie terrestre (LST) es únicamente la medición física de entrada; el fenómeno geográfico real de interés es la SUHI, calculada al restar a cada celda urbana una línea base de referencia rural (compuesta por áreas con alta densidad vegetal y mínima alteración antropogénica).
-
-### Soporte a Misiones Satelitales    
-El diseño paramétrico y modular de este pipeline sirve como **validador analítico y conceptual clave para la misión científica de un nanosatélite de monitoreo térmico**. Permite verificar y calibrar en tierra los patrones espaciales de anomalías térmicas (SUHI) y su relación con coberturas de suelo y proximidad industrial, sentando las bases metodológicas para los algoritmos de detección que procesarán las imágenes capturadas por el sensor térmico del nanosatélite.
+El pipeline está diseñado de manera paramétrica y modular, funcionando como un **validador analítico clave para la misión de un nanosatélite de monitoreo térmico**. Permite verificar y calibrar en tierra los patrones espaciales de anomalías térmicas (SUHI) y su relación con coberturas de suelo y proximidad industrial.
 
 ---
 
-## 2. Arquitectura de Archivos y Flujo Operativo
+## 1. Estructura del Proyecto
 
-### Árbol de Directorios Real del Repositorio
-
-El repositorio está organizado bajo una estructura modular de ciencia de datos geoespaciales:
+El repositorio está organizado bajo una estructura modular estándar para proyectos de ciencia de datos geoespaciales:
 
 ```text
 UHI_Analysis_pipeline_MVP_v1/
-├── data/
-│   ├── interim/                    # Datos geográficos temporales y rásters intermedios
-│   │   ├── cuerpos_agua_2026.gpkg  # Capa de polígonos disueltos de cuerpos de agua
-│   │   ├── dw_mty_2026.tif         # Ráster multibanda (built, trees, bare, water, grass) de Dynamic World (10m)
-│   │   ├── green_mask_mty_2026.tif # Máscara binaria de vegetación activa (Sentinel-2, 10m)
-│   │   ├── green_pct_30m.tif       # Ráster de porcentaje de cobertura verde remuestreado a 30m
-│   │   ├── lst_day_2026.tif        # Ráster LST diurno calibrado (Landsat 8, 30m)
-│   │   ├── malla_features_2026.gpkg # Malla base enriquecida con LST, NDVI y fracción verde
-│   │   ├── malla_industria_2026.gpkg # Malla enriquecida con porcentaje de área industrial
-│   │   ├── malla_monterrey_30m.gpkg # Cuadrícula espacial base (30m, UTM EPSG:32614 -> WGS84 EPSG:4326)
-│   │   └── ndvi_mty_2026.tif       # Ráster del índice NDVI de Sentinel-2 (10m)
-│   ├── processed/                  # Datasets maestros geoespaciales consolidados
-│   │   ├── ageb_maestra_mty_2026.gpkg # Capa de polígonos AGEB con variables socio-demográficas y medias físicas
-│   │   ├── malla_maestra_mty_2026.gpkg # Malla maestra v1 (LST, cobertura verde e intensidad SUHI)
-│   │   ├── malla_maestra_mty_2026_v2.gpkg # Malla maestra v2 (v1 + Dynamic World + distancias euclidianas)
-│   │   └── malla_maestra_mty_2026_v3.gpkg # Malla maestra v3 (Copia de compatibilidad física para graficación)
-│   └── raw/                        # Insumos espaciales y censales crudos
-│       ├── AGEB_ZMM_Dani.json      # Límites geográficos oficiales de AGEB de la ZMM
-│       ├── RESAGEBURB2020 - 19 Nuevo León (1).csv # Censo de Población y Vivienda 2020 a nivel de manzana/AGEB
-│       └── fd_agebmza_urbana_cpv2020.csv # Descriptor de variables censales
-├── notebooks/
-│   └── 00_uhi_mvp_orchestrator.ipynb # Jupyter Notebook para ejecución del pipeline interactivo y análisis visual
-├── outputs/
-│   ├── figures/                    # Entregables visuales y paneles de auditoría espacial
-│   │   ├── 01_mapa_satelital_limpio.png
-│   │   ├── 02_eda_distribuciones.png
-│   │   ├── 03_panel_auditoria_espacial.png
-│   │   ├── 04_matriz_correlacion_physical_30m.png
-│   │   ├── 05_matriz_correlacion_social_ageb.png
-│   │   └── mapa_base_estudio.png
-│   ├── maps/                       # Mapas interactivos auto-contenidos (Folium/Kepler)
-│   └── tables/                     # Tablas y matrices de resultados en formato plano
-│       └── 05_correlaciones_maestras.csv # Coeficientes de correlación Spearman multiescala
-├── src/                            # Módulos Python del backend del pipeline
-│   ├── config.py                   # Configuración global, límites del AOI y rutas del proyecto
-│   ├── gee_data.py                 # Conexión, autenticación e inicialización de Google Earth Engine API
-│   ├── grid.py                     # Generación y delimitación geométrica de la malla de 30m en el AOI
-│   ├── lst.py                      # Descarga y calibración a Celsius de LST (Landsat 8)
-│   ├── ndvi.py                     # Descarga de Sentinel-2, cálculo de NDVI y máscara binaria (>0.3)
-│   ├── dynamic_world.py            # Consulta a Dynamic World y cálculo de fracciones de cobertura
-│   ├── industry.py                 # Obtención de industria (OSM) y cálculo de porcentajes y distancias
-│   ├── water.py                    # Obtención de cuerpos de agua (OSM) y cálculo de distancias
-│   ├── ageb_social.py              # Extracción del Censo INEGI 2020, normalización y agregación zonal
-│   ├── uhi_metrics.py              # Cálculo de la intensidad de anomalía térmica SUHI con control rural
-│   ├── plots.py                    # Funciones para la suite visual de auditoría geoespacial
-│   └── stats.py                    # Cálculo de correlaciones Spearman físicas y socioambientales
-├── main.py                         # Orquestador del pipeline completo de producción
-├── run_hotspots_analysis.py        # Detección de hotspots térmicos y clustering DBSCAN
-├── run_coldspots_analysis.py       # Identificación de coldspots y amortiguamiento térmico
-├── run_scale_correlation_analysis.py # Análisis de efecto de escala (MAUP) y modelado GWR
-├── run_density_zones_analysis.py   # Segmentación y análisis de correlación por zonas de densidad construida
-├── requirements.txt                # Dependencias librerías Python del entorno
-└── test_features_suhi.py           # Script autónomo para pruebas de integración del pipeline
+├── data/                             # Datos geográficos (raw, interim, processed) - en gitignore
+├── notebooks/                        # Jupyter Notebooks principales para ejecución interactiva
+│   ├── exploratorios/                # Notebooks históricos de desarrollo (en proceso)
+│   ├── 01_uhi_spatial_correlation_regional.ipynb
+│   ├── 02_uhi_hotspot_case_studies.ipynb
+│   └── 03_uhi_gwr_spatial_correlation.ipynb
+├── scripts/                          # Scripts ejecutables autónomos de análisis avanzado
+│   ├── __init__.py
+│   ├── run_bottom_up_regional_analysis.py # Análisis multiescala por densidad, buffers y municipios
+│   ├── run_coldspots_analysis.py     # Delimitación y priorización de coldspots urbanos (DBSCAN)
+│   ├── run_density_zones_analysis.py # Análisis segmentado por densidad de impermeabilidad
+│   ├── run_diagnostics.py            # Diagnóstico de calidad de datos y emparejamiento censal
+│   ├── run_gwr_sensitivity_audit.py  # Auditoría y comparación de semillas para GWR
+│   ├── run_hotspots_analysis.py      # Detección de hotspots térmicos críticos (DBSCAN)
+│   ├── run_scale_correlation_analysis.py # Análisis del efecto de escala y ajuste local GWR
+│   └── validate_gwr.py               # Validación estadística y pruebas de colinealidad de GWR
+├── reports/                          # NUEVO: Reportes y entregables técnicos generados
+│   └── bottom_up_analysis_report.md  # Reporte de análisis regional bottom-up y recomendaciones
+├── outputs/                          # Figuras, mapas interactivos (Folium) y tablas CSV generadas
+├── src/                              # Backend del pipeline (módulos reutilizables)
+│   ├── config.py                     # Parámetros, bbox y constantes de rutas
+│   ├── gee_data.py                   # Conexión e inicialización de Google Earth Engine API
+│   ├── grid.py                       # Generación de la malla regular de 30 metros
+│   ├── lst.py                        # Descarga y calibración de temperatura (Landsat 8)
+│   ├── ndvi.py                       # Extracción de reflectancias Sentinel-2 e índice NDVI
+│   ├── dynamic_world.py              # Extracción de coberturas terrestres (Dynamic World, GEE)
+│   ├── industry.py                   # Descarga y cálculo de densidad industrial (OSM)
+│   ├── water.py                      # Descarga y cálculo de distancias a cuerpos de agua (OSM)
+│   ├── ageb_social.py                # Integración del Censo INEGI 2020 a nivel AGEB
+│   ├── uhi_metrics.py                # Cálculo de SUHI con áreas de control rural
+│   ├── plots.py                      # Suite de graficación espacial y visualización
+│   └── stats.py                      # Funciones de cálculo de matrices de Spearman
+├── main.py                           # Orquestador del pipeline base de preparación de datos
+└── requirements.txt                  # Dependencias del entorno de ejecución Python
 ```
 
-### Flujo Operativo y Lógica de Procesamiento
+---
 
-El pipeline se ejecuta secuencialmente a través de `main.py` de la siguiente forma:
+## 2. Diferencia entre Componentes
 
-1. **Paso 1: Inicialización de Google Earth Engine (GEE)**: Conecta con GEE usando credenciales locales para la obtención remota de datos.
-2. **Paso 2: Construcción de la Malla Base de 30m**: Genera una cuadrícula regular de 30 metros de resolución espacial proyectada en UTM Zona 14N (EPSG:32614) que abarca el área de estudio en Monterrey (según los límites definidos en `AOI_BBOX` en `config.py`), y la guarda en WGS84 (EPSG:4326).
-3. **Paso 3: Obtención de LST y NDVI**: Descarga desde GEE los compuestos medianos de primavera de Temperatura Superficial Terrestre (LST) de Landsat 8 y NDVI de Sentinel-2 a resoluciones de 30m y 10m respectivamente.
-4. **Paso 4: Mapeo Satelital en Malla**: Calcula localmente el porcentaje de cobertura verde (`green_pct`) mediante el remuestreo de la máscara de vegetación de Sentinel-2 (>0.3) de 10m a 30m, y muestrea la LST y la cobertura verde sobre los centroides de cada celda de la cuadrícula.
-5. **Paso 5: Fracciones de Dynamic World**: Descarga probabilidades anuales promediadas de clases de cobertura terrestre de Dynamic World (Sentinel-2, 10m) y las mapea a la malla (Built, Trees, Bare, Water, Grass).
-6. **Paso 6: Capas OSM e Industria**: Descarga polígonos industriales de OpenStreetMap, resuelve superposiciones y calcula la fracción de área industrial en cada celda (`industrial_osm_pct`).
-7. **Paso 7: Calibración e Intensidad de SUHI**: Calcula la Anomalía Térmica SUHI Diurna (`suhi_day_c`) restando a la LST de cada celda la temperatura promedio de 3 zonas de referencia rural fuera de la mancha urbana de la ZMM (Norte: Salinas Victoria, Este: Pesquería/Cadereyta, Sur: Santiago/Allende) calculada en GEE. **Éste es el indicador central del análisis.**
-8. **Paso 8: Consolidación Master v2 (Distancias y DW)**: Calcula las distancias euclidianas exactas desde cada centroide de celda a zonas industriales generales, a cuerpos de agua y a la coordenada de la planta Ternium Guerrero, uniendo todos los datos biofísicos y espaciales.
-9. **Paso 9: Consolidación Master v3 y Agregación Zonal AGEB**: Carga los polígonos de AGEB urbanas de la ZMM y los datos del Censo de Población INEGI 2020. Mapea los centroides de las celdas a cada polígono de AGEB y calcula estadísticas zonales (promedios físicos de SUHI e isla de calor) que une con variables sociales normalizadas (densidad, grupos de edad, etnicidad).
-10. **Paso 10: Visualizaciones y Auditoría de Correlaciones**: Genera mapas base satelitales y de contexto, curvas de distribución y matrices de correlación no paramétrica de Spearman a ambas escalas operativa y zonal, guardando tablas de coeficientes y mapas en `outputs/`.
+*   **`main.py` (Orquestador Base):** Es el punto de entrada oficial para la **extracción, procesamiento y preparación de los datos**. Se encarga de descargar insumos satelitales vía GEE, generar la cuadrícula espacial de 30m, calcular la anomalía térmica de la SUHI restando el promedio de control rural, integrar el Censo INEGI 2020 a nivel de AGEB y consolidar las bases de datos maestras (`data/processed/malla_modelado_multiescala_mty.gpkg` y `data/processed/ageb_maestra_mty_2026.gpkg`).
+*   **`src/` (Módulos Reutilizables):** Contiene la lógica interna y las funciones empaquetadas (módulos de Python). No contiene scripts de ejecución directa; proporciona las herramientas de backend que importan tanto `main.py` como los scripts en `scripts/`.
+*   **`scripts/` (Análisis Avanzado):** Alberga los scripts ejecutables independientes de análisis de datos. Consumen las bases de datos preparadas por `main.py` y ejecutan tareas analíticas específicas como detección de clusters espaciales (DBSCAN), correlaciones multiescala por amortiguamiento (buffers), auditoría de modelos locales (GWR) y generación de reportes específicos en la carpeta `reports/`.
 
 ---
 
-## 3. Diccionario de Variables Geoespaciales (Estado Actual)
+## 3. Flujo de Procesamiento (De Inicio a Fin)
 
-La siguiente tabla documenta de forma estricta las variables y columnas que son calculadas y almacenadas en los archivos finales del pipeline (`malla_maestra_mty_2026_v2.gpkg` y `ageb_maestra_mty_2026.gpkg`), destacando su relación con la intensidad de la isla de calor (SUHI):
+El pipeline de preparación de datos orquestado por `main.py` ejecuta secuencialmente las siguientes fases:
 
-| Nombre de Variable / Columna | Tipo de Dato | Escala Operativa | Fuente / Sensor de Origen | Descripción Técnica Objetiva |
+1.  **Conexión GEE (Paso 1):** Conexión con Google Earth Engine para autenticación y consulta remota.
+2.  **Construcción de Malla (Paso 2):** Generación de la cuadrícula base regular de 30 metros proyectada en UTM Zona 14N (EPSG:32614) que define las unidades de observación del modelo.
+3.  **Descarga Satelital (Paso 3 y 4):** Descarga del compuesto de mediana de primavera de Temperatura Superficial Terrestre (LST) de Landsat 8 y del NDVI máximo de Sentinel-2. Se calcula el porcentaje de cobertura verde (`green_pct`) mediante remuestreo de celdas de 10m a 30m.
+4.  **Clasificación de Suelo (Paso 5 y 6):** Descarga de coberturas de suelo de Dynamic World (Built, Trees, Bare, Water, Grass) y descarga de polígonos industriales y cuerpos de agua de OpenStreetMap (OSM) para calcular la densidad de ocupación industrial local.
+5.  **Calibración SUHI (Paso 7):** Cálculo de la anomalía de la SUHI diurna (`suhi_day_c`) restando a la LST urbana la mediana de 3 zonas rurales externas en Monterrey.
+6.  **Medición Euclidiana (Paso 8):** Cálculo de distancias mínimas en metros a zonas industriales generales, cuerpos de agua y a la planta de Ternium Guerrero.
+7.  **Integración Demográfica (Paso 9):** Spatial join de centroides de la malla de 30m a polígonos de AGEB. Agrega datos absolutos del Censo INEGI 2020 y calcula tasas e indicadores demográficos normalizados (densidad poblacional, porcentaje de adultos mayores y niños).
+8.  **Visualizaciones (Paso 10):** Generación automática de matrices de Spearman globales (a escala celda y AGEB), histogramas del EDA y paneles de auditoría espacial.
+
+---
+
+## 4. Análisis Especializados (scripts/)
+
+Una vez que `main.py` genera las bases consolidadas, se pueden correr los análisis independientes en la carpeta `scripts/`:
+
+*   **Análisis Regional Bottom-Up (`run_bottom_up_regional_analysis.py`):** Realiza un análisis multiescala de correlaciones de Spearman segmentado por el tipo de densidad construida (Baja, Media, Alta) y 5 escalas de buffers (30m, 100m, 250m, 500m, 1000m) para cada uno de los 4 municipios (Monterrey, San Pedro, Guadalupe, San Nicolás) y a nivel individual de 383 AGEBs. Genera un reporte técnico de política pública en `reports/bottom_up_analysis_report.md`.
+*   **Análisis por Zonas de Densidad (`run_density_zones_analysis.py`):** Segmenta el comportamiento de las correlaciones a escala ZMM para aislar los efectos de la vegetación en periferias y de la industria en zonas de densidad construida intermedia.
+*   **Detección de Hotspots y Coldspots (`run_hotspots_analysis.py` y `run_coldspots_analysis.py`):** Utilizan el algoritmo de agrupamiento espacial DBSCAN para aislar islas de calor críticas (hotspots) e islas de frío (coldspots) dentro de la trama urbana, calculando el Índice de Eficacia de Enfriamiento (CEI) para priorizar la infraestructura verde y mitigar la inercia térmica.
+*   **Modelado Local GWR y MAUP (`run_scale_correlation_analysis.py`, `run_gwr_sensitivity_audit.py` y `validate_gwr.py`):** Mitigan el Problema de la Unidad de Área Modificable (MAUP) y la no estacionariedad espacial aplicando modelos de Regresión Ponderada Geográficamente (GWR), validando colinealidad local (Condition Number) y consistencia ante variaciones de semilla.
+
+---
+
+## 5. Notebooks del Proyecto
+
+*   **`01_uhi_spatial_correlation_regional.ipynb`:** Orquestación interactiva del análisis de correlación. Muestra el scatterplot de línea base (cobertura verde vs SUHI), las matrices globales de Spearman y llama dinámicamente al motor de análisis bottom-up municipal.
+*   **`02_uhi_hotspot_case_studies.ipynb`:** Análisis interactivo y mapas de Folium para los casos de estudio de islas de calor urbanas del algoritmo DBSCAN.
+*   **`03_uhi_gwr_spatial_correlation.ipynb`:** Implementación visual y auditoría espacial de los coeficientes locales resultantes de la regresión ponderada geográficamente.
+*   **`exploratorios/`:** Carpeta que contiene notebooks de desarrollo e investigación histórica (diagnósticos, optimización y machine learning espacial) actualmente en proceso de actualización.
+
+---
+
+## 6. Diccionario de Variables Clave
+
+| Variable | Escala | Tipo | Origen | Descripción Técnica |
 | :--- | :---: | :---: | :---: | :--- |
-| **`cell_id`** | Entero (`int`) | Malla de 30m | Interno (`grid.py`) | Identificador único numérico incremental asignado a cada celda de la cuadrícula de estudio. |
-| **`geometry`** | Geometría (`Polygon`) | Malla de 30m / AGEB | Interno / INEGI | Geometría vectorial que define los límites espaciales (celda o polígono AGEB). |
-| **`lst_day_c`** | Flotante (`float`) | Malla de 30m / AGEB | Landsat 8 (TIRS B10) | Temperatura Superficial Terrestre (LST) diurna calibrada en grados Celsius (°C), utilizada como insumo físico base para calcular la SUHI. |
-| **`lst_night_c`** | Flotante (`float`) | Malla de 30m / AGEB | Landsat 8 (TIRS B10) | Temperatura Superficial Terrestre (LST) nocturna. Rellenada con `NaN` (desactivada en el actual MVP). |
-| **`lst_c`** | Flotante (`float`) | Malla de 30m / AGEB | Landsat 8 (TIRS B10) | Copia directa de `lst_day_c` para compatibilidad en gráficas del pipeline. |
-| **`green_pct`** | Flotante (`float`) | Malla de 30m / AGEB | Sentinel-2 (MSI) | Porcentaje de cobertura de vegetación verde activa (NDVI > 0.3). Clave para delimitar el área rural de control para SUHI. |
-| **`industrial_osm_pct`** | Flotante (`float`) | Malla de 30m / AGEB | OpenStreetMap (OSM) | Porcentaje de superficie de la celda ocupado por usos de suelo industrial según polígonos de OSM. |
-| **`suhi_day_c`** | Flotante (`float`) | Malla de 30m / AGEB | Landsat 8 / Interno | **Indicador de SUHI Diurna (°C)**. Diferencia de LST de cada celda contra el promedio térmico de 3 zonas de referencia rural externa (Norte, Este, Sur) calculado en GEE. |
-| **`suhi_c`** | Flotante (`float`) | Malla de 30m / AGEB | Landsat 8 / Interno | Copia directa de `suhi_day_c` utilizada para propósitos de compatibilidad física en gráficos. |
-| **`suhi_night_c`** | Flotante (`float`) | Malla de 30m / AGEB | Landsat 8 / Interno | **Indicador de SUHI Nocturna (°C)**. Rellenada con `NaN` (desactivada en el actual MVP). |
-| **`dw_built_pct`** | Flotante (`float`) | Malla de 30m / AGEB | Dynamic World (GEE) | Porcentaje de cobertura del suelo "Edificada / Superficie Impermeable" (inductor físico de SUHI). |
-| **`dw_trees_pct`** | Flotante (`float`) | Malla de 30m / AGEB | Dynamic World (GEE) | Porcentaje de cobertura del suelo "Árboles / Dosel Arbóreo" (mitigador de SUHI). |
-| **`dw_bare_pct`** | Flotante (`float`) | Malla de 30m / AGEB | Dynamic World (GEE) | Porcentaje de cobertura del suelo "Suelo Desnudo / Suelo Expuesto". |
-| **`dw_water_pct`** | Flotante (`float`) | Malla de 30m / AGEB | Dynamic World (GEE) | Porcentaje de cobertura del suelo "Agua". |
-| **`dw_grass_pct`** | Flotante (`float`) | Malla de 30m / AGEB | Dynamic World (GEE) | Porcentaje de cobertura del suelo "Pastizales / Herbazales". |
-| **`distance_to_industry_osm_m`**| Flotante (`float`) | Malla de 30m | OSM / Interno | Distancia euclidiana mínima en metros a zonas industriales (asociada a fuentes antropogénicas de calor). |
-| **`distance_to_ternium_m`** | Flotante (`float`) | Malla de 30m | Interno (Point) | Distancia euclidiana en metros a la planta Ternium Guerrero (`Point(-100.299792, 25.720855)`). |
-| **`distance_to_water_m`** | Flotante (`float`) | Malla de 30m | OSM / Interno | Distancia euclidiana mínima en metros a cuerpos de agua (sumideros urbanos de calor). |
-| **`CVEGEO`** | Cadena (`str`) | Polígono AGEB | INEGI | Clave geoestadística única de identificación de la AGEB (13 dígitos). |
-| **`area_km2`** | Flotante (`float`) | Polígono AGEB | INEGI | Área en kilómetros cuadrados (km²) calculada sobre el polígono de la AGEB. |
-| **`POBTOT`** | Flotante (`float`) | Polígono AGEB | INEGI (Censo 2020) | Población residente total censada dentro de la AGEB. |
-| **`POB0_14`** | Flotante (`float`) | Polígono AGEB | INEGI (Censo 2020) | Población infantil residente de 0 a 14 años de edad en la AGEB. |
-| **`POB65_MAS`** | Flotante (`float`) | Polígono AGEB | INEGI (Censo 2020) | Población residente de 65 años y más (población vulnerable a olas de calor). |
-| **`P_60YMAS`** | Flotante (`float`) | Polígono AGEB | INEGI (Censo 2020) | Población residente de 60 años y más. |
-| **`P3YM_HLI`** | Flotante (`float`) | Polígono AGEB | INEGI (Censo 2020) | Población de 3 años y más que habla alguna lengua indígena en la AGEB. |
-| **`pop_density_ageb`** | Flotante (`float`) | Polígono AGEB | INEGI / Interno | Densidad de población (habitantes por km²) de la AGEB: `POBTOT / area_km2`. |
-| **`pct_0_14`** | Flotante (`float`) | Polígono AGEB | INEGI / Interno | Porcentaje de población infantil de 0 a 14 años en la AGEB. |
-| **`pct_65_mas`** | Flotante (`float`) | Polígono AGEB | INEGI / Interno | Porcentaje de población vulnerable de 65 años o más en la AGEB. |
-| **`pct_60ymas`** | Flotante (`float`) | Polígono AGEB | INEGI / Interno | Porcentaje de población adulta de 60 años o más en la AGEB. |
-| **`pct_hli`** | Flotante (`float`) | Polígono AGEB | INEGI / Interno | Porcentaje de población indígena en la AGEB. |
-
----
-
-## 4. Escalas de Análisis y Mitigación del MAUP
-
-El diseño arquitectónico del pipeline implementa un esquema analítico a **dos escalas geográficas**:
-
-### 1. Escala Micro (Malla Regular de 30m)
-*   **Finalidad**: Análisis físico-ambiental continuo. La física térmica de la isla de calor y los patrones de vegetación ocurren de manera altamente localizada e independiente de las demarcaciones político-administrativas. 
-*   **Ventaja**: El uso de una cuadrícula espacial regular (malla regular) de 30 metros de resolución permite mantener la variabilidad espacial fina (evitando la pérdida de información por suavizado espacial) y garantiza la precisión en la medición de métricas euclidianas exactas (como las distancias métricas a industrias, cuerpos de agua o la planta de Ternium).
-
-### 2. Escala Macro (Agregación Administrativa por AGEB)
-*   **Finalidad**: Análisis socioambiental y de justicia ambiental. Las variables demográficas y de vulnerabilidad socioeconómica del Censo INEGI no pueden asociarse directamente a un píxel por motivos éticos y metodológicos de agregación de datos y protección a la privacidad.
-*   **Implementación**: Mediante un cruce de unión espacial por centroides (`Spatial Join`), se determina qué celdas de la malla de 30m pertenecen a qué polígonos de AGEB. Se calculan las estadísticas zonales (medias de LST, NDVI, coberturas y, de manera crucial, la intensidad de la **SUHI**) que a su vez se combinan con los atributos censales consolidados.
-
-### Mitigación del MAUP (Modifiable Areal Unit Problem)
-El MAUP es un sesgo estadístico que surge al agrupar observaciones individuales en unidades geográficas agregadas y arbitrarias, lo que puede distorsionar significativamente los coeficientes de correlación y otros análisis multivariados (diluyendo o exagerando asociaciones). Este pipeline mitiga este problema de la siguiente forma:
-*   **Análisis Paralelo Multiescala**: En lugar de fusionar o interpolar artificialmente los datos censales a 30m, el pipeline mantiene dos procesos y dos suites estadísticas paralelas (Spearman Físico a 30m y Spearman Socioambiental a nivel AGEB). Esto aísla los fenómenos puramente físicos de los procesos demográficos y geodemográficos complejos.
-*   **Normalización Demográfica**: Todas las variables demográficas a nivel AGEB se calculan y analizan como tasas normalizadas (porcentajes de población y densidades demográficas) en lugar de recuentos absolutos agregados. Esto contrarresta la distorsión del MAUP inducida por el efecto escala (diferentes tamaños de población entre AGEBs) y el efecto de agrupación espacial (formas irregulares de los polígonos).
-
----
-
-## 5. Metodología Estadística y Auditoría de Datos
-
-Como parte de la rigurosidad científica del pipeline, se ha estructurado una auditoría metodológica sobre el origen temporal de los datos, las correlaciones aplicadas y la calidad intrínseca de los sensores.
-
-### 5.1. Temporalidad y Agregación Multitemporal
-Para capturar de forma representativa la intensidad de la SUHI evitando anomalías transitorias de un solo día (ej. frentes fríos locales o días con alta nubosidad), el pipeline utiliza una agregación multitemporal basada en Earth Engine:
-*   **Ventana de Análisis**: Primavera (Temporada Seca/Cálida: 1 de marzo al 31 de mayo de 2026). Éste es el periodo de mayor estrés térmico en el norte de México.
-*   **Procesamiento LST (Landsat 8)**: Se consultan todas las escenas de la colección del sensor TIRS disponibles para este rango de fechas. Se aplica una reducción temporal por **mediana** a nivel de píxel. La mediana matemática limpia efectivamente los valores extremos causados por nubes no detectadas, sombras de nubes o anomalías del sensor, preservando el valor térmico central más probable de la temporada seca.
-*   **Procesamiento NDVI (Sentinel-2)**: En lugar de un compuesto, el algoritmo selecciona la **escena única con menor cobertura de nubes** (`first()` de la colección ordenada por nubosidad). Esto garantiza la integridad espectral de las bandas roja e infrarroja cercana para el cálculo del NDVI, evitando el "suavizado" artificial de los índices vegetales que causan los compuestos medianos en áreas con rápido crecimiento estacional.
-*   **Procesamiento Dynamic World**: Promedia las probabilidades de cobertura temporal de primavera mediante la **media** aritmética. Esto permite representar la probabilidad persistente de cada celda a pertenecer a una cobertura específica durante la temporada (por ejemplo, qué tan consistentemente una superficie actúa como construida u arbolada).
-
-### 5.2. Análisis de Correlación y Propuestas Avanzadas
-Actualmente se calcula la **Correlación de Rangos de Spearman (No Paramétrica)** para ambas escalas operativas (celda de 30m y polígono AGEB). Esta elección metodológica se debe a que las variables ambientales y la temperatura no poseen relaciones lineales ni distribuciones normales (ej. la distancia industrial tiene un decaimiento térmico exponencial o logarítmico).
-
-#### 5.2.1. Top 10 de Correlaciones de Mayor Impacto (Actualizado 2026)
-A continuación se detallan las variables físicas y sociales que presentan mayor correlación (en magnitud absoluta) con la intensidad de la Isla de Calor Urbana Superficial (`suhi_c`), calculadas directamente sobre las bases de datos maestras:
-
-##### A. Variables Físicas (Escala Malla 30m)
-*Estas variables explican el comportamiento biofísico y estructural directo sobre la anomalía térmica.*
-
-| # | Variable | Spearman ($r$) | Tipo de Impacto | Interpretación de Impacto Territorial |
-| :---: | :--- | :---: | :---: | :--- |
-| **1** | **`green_pct`** | **-0.230** | Mitigador | Cobertura verde activa. Principal regulador térmico por evapotranspiración. |
-| **2** | **`dw_trees_pct`** | **-0.210** | Mitigador | Cobertura forestal de dosel arbóreo (Dynamic World). |
-| **3** | **`dw_grass_pct`** | **-0.173** | Mitigador | Cobertura de pastos y vegetación herbácea. |
-| **4** | **`industrial_osm_pct`** | **+0.172** | Intensificador | Uso de suelo industrial activo (alta emisión de calor). |
-| **5** | **`dw_built_pct`** | **+0.158** | Intensificador | Superficie urbana impermeable/construida (asfalto, concreto). |
-| **6** | **`distance_to_industry_osm_m`** | **-0.141** | Mitigador Ind. | A mayor distancia de industrias, disminuye la SUHI. |
-| **7** | **`dw_bare_pct`** | **+0.098** | Intensificador | Suelo desnudo/expuesto. Absorbe calor sin inercia de concreto. |
-| **8** | **`distance_to_ternium_m`** | **-0.060** | Mitigador Ind. | A mayor distancia de la planta Ternium Guerrero, menor calor. |
-| **9** | **`distance_to_water_m`** | **-0.057** | Mitigador Ind. | Distancia a cuerpos de agua (débil por la escasez local de agua). |
-| **10** | **`dw_water_pct`** | **-0.040** | Mitigador | Presencia local de agua superficial. |
-
-##### B. Variables Sociales y de Vulnerabilidad (Escala AGEB)
-*Estas variables reflejan justicia ambiental y distribución de la exposición social ante la SUHI.*
-
-| # | Variable | Spearman ($r$) | Relación Térmica | Significado de Justicia Ambiental / Exposición |
-| :---: | :--- | :---: | :---: | :--- |
-| **1** | **`pct_vph_snbien`** | **-0.170** | Menor Calor | **Efecto Periferia:** Las viviendas de menor nivel socioeconómico se ubican en la periferia de la ZMM, cerca de límites rurales más frescos. |
-| **2** | **`pct_0_14`** | **-0.169** | Menor Calor | Los fraccionamientos familiares periféricos son térmicamente más frescos. |
-| **3** | **`pct_65_mas`** | **+0.169** | **Mayor Calor** | **¡Vulnerabilidad Crítica!** Los adultos mayores viven en las zonas centrales más antiguas de la ciudad, que son las más calientes. |
-| **4** | **`pct_60ymas`** | **+0.151** | **Mayor Calor** | Refuerza el patrón de exposición del sector demográfico mayor de 60 años. |
-| **5** | **`pop_density_ageb`** | **-0.117** | Menor Calor | Densidades compactas residenciales son menos cálidas que las extensas zonas industriales sin población. |
-| **6** | **`graproes`** | **+0.116** | **Mayor Calor** | Población con mayor educación se concentra en distritos comerciales centrales densos. |
-| **7** | **`pct_vph_refri`** | **+0.106** | **Mayor Calor** | Proxy de riqueza/centralidad urbana correlacionado con mayores temperaturas. |
-| **8** | **`POB65_MAS`** | **+0.102** | **Mayor Calor** | Conteo absoluto de adultos mayores expuestos térmicamente en el centro. |
-| **9** | **`POB0_14`** | **-0.094** | Menor Calor | Conteo absoluto de población infantil en zonas periféricas. |
-| **10** | **`pct_psinder`** | **-0.085** | Menor Calor | Marginación en salud correlacionada con las áreas periféricas más templadas. |
-
-#### 5.2.2. Análisis de Correlación Diferenciado por Zonas de Densidad Construida (Nuevo Enfoque)
-A diferencia del análisis global de la ZMM (que promedia y diluye las dinámicas biofísicas y sociales, arrojando coeficientes globales bajos como $r = -0.230$ para `green_pct`), el pipeline incorpora una segmentación espacial basada en la densidad de superficie impermeable (`dw_built_pct` de Dynamic World). Esto divide el área de estudio en tres regímenes diferenciados:
-
-1. **Baja Densidad (< 20% de superficie construida)**: Representa la interfaz urbano-rural y áreas periféricas.
-   * **Dinámica Térmica**: La cobertura vegetal (`green_pct`) y el dosel arbóreo (`dw_trees_pct`) ejercen su máximo poder regulador por evapotranspiración, mostrando correlaciones Spearman excepcionalmente altas con el enfriamiento ($r = -0.604$ y $r = -0.649$, respectivamente). 
-   * **Efecto de Buffer**: A nivel local, los buffers de vegetación a 500m y 1000m incrementan el efecto de enfriamiento hasta $r = -0.844$ y $r = -0.797$.
-2. **Media Densidad (20-60% de superficie construida)**: Corresponde a las zonas residenciales intermedias y corredores urbanos.
-   * **Dinámica Térmica**: La correlación de la vegetación global disminuye ($r = -0.160$), y el porcentaje construido directo (`dw_built_pct`) pierde significancia ($r = 0.009$).
-   * **Driver Principal**: Las actividades industriales activas y la cercanía a estas áreas se convierten en los principales inductores de calor. La densidad industrial en un buffer de 250m muestra un Spearman de $r = +0.326$, y la distancia euclidiana a industrias tiene una relación inversa significativa de $r = -0.295$.
-3. **Alta Densidad (>= 60% de superficie construida)**: Zonas del núcleo urbano denso, centros históricos y parques industriales masivos.
-   * **Dinámica Térmica**: Se observa un efecto de saturación térmica donde la correlación de la vegetación local o de la densidad de concreto se vuelve insignificante ($r \approx -0.060$).
-   * **Driver Principal**: La inercia térmica acumulada por la morfología urbana y el calor antropogénico domina el comportamiento de la SUHI. A esta escala, las correlaciones sociales de vulnerabilidad y justicia ambiental cobran mayor fuerza, mostrando que la escolaridad (`graproes`, $r = +0.127$) y el acceso a aire acondicionado (`pct_vph_refri`, $r = +0.121$) se concentran en las zonas centrales calientes, mientras que las áreas de marginación periférica (`pct_vph_snbien`, $r = -0.146$) se ubican en zonas periféricas más frescas.
-
-Para ejecutar este análisis segmentado y generar los heatmaps de correlación por zona y los perfiles multiescala de buffers, utiliza el script:
-`python run_density_zones_analysis.py`
-
-#### Propuestas Estadísticas Avanzadas (Próximos Pasos):
-Para superar las limitaciones de la correlación simple, se propone incorporar en futuras iteraciones:
-1.  **Autocorrelación Espacial (Moran's I Global y Local)**: El fenómeno SUHI viola el supuesto de independencia de las observaciones. Calcular el Índice de Moran permitiría mapear estadísticamente los **Hotspots (LISA - Local Indicators of Spatial Association)** de calor urbano (zonas industriales y de alta densidad edificada) y **Coldspots** (zonas arboladas y de control rural).
-2.  **Modelos de Regresión Espacial (SAR y GWR)**: OLS estándar sufre de autocorrelación en los residuos en datos espaciales. Se propone implementar modelos de **Regresión Espacial Autorregresiva (SAR)** o **Regresión Ponderada Geográficamente (GWR)** para evaluar el impacto local y espacialmente variable de coberturas como `dw_built_pct` y `dw_trees_pct` sobre la intensidad de `suhi_day_c`.
-3.  **Índice de Vulnerabilidad Térmica (TVI)**: Construcción de un índice multivariado ponderado que combine el Peligro Físico (intensidad SUHI) con la Sensibilidad Social (densidad de población de adultos mayores `pct_65_mas` y densidad de población infantil `pct_0_14` por AGEB).
-
-### 5.3. Auditoría de Calidad y Naturaleza de las Fuentes de Datos
-
-| Sensor / Fuente | Naturaleza de la Medida | Resolución Espacial | Limitaciones e Incertidumbre Espectral |
-| :--- | :--- | :---: | :--- |
-| **Landsat 8 (TIRS)** | Radianza Térmica (Banda 10) | 100m (resampleado a 30m) | **Incertidumbre de Resolución:** El sensor térmico adquiere a 100m de resolución y es remuestreado por el USGS a 30m mediante interpolación de convolución cúbica. Esto genera una dispersión y dilución física de puntos de calor muy localizados (micro-islas de calor). Adicionalmente, la corrección de emisividad depende de estimaciones auxiliares del vapor de agua atmosférico. |
-| **Sentinel-2 (MSI)** | Reflectancia Óptica (B8 y B4) | 10m | **Alta Precisión:** Adquisición a 10m. La corrección atmosférica integrada (Level 2A) es altamente robusta. Limitada únicamente por la presencia de cobertura nubosa persistente o sombras topográficas. |
-| **Dynamic World (GEE)** | Clasificación de Cobertura (Deep Learning) | 10m | **Incertidumbre del Modelo:** Al ser un clasificador probabilístico basado en redes neuronales convolucionales aplicadas sobre Sentinel-2, está sujeto a errores de clasificación espectral. Áreas mixtas (suelo desnudo con vegetación seca o techos con materiales específicos) pueden presentar clasificaciones erróneas. |
-| **OpenStreetMap (OSM)** | Vectores Colaborativos (Crowdsourcing) | Variable | **Heterogeneidad de Datos:** Alta completitud en el centro de la zona metropolitana para zonas industriales y cuerpos de agua de gran tamaño. Existe riesgo de omisión o retraso de actualización en áreas industriales periféricas recientes y en pequeños canales de escurrimiento temporales. |
-| **INEGI (Censo 2020)** | Datos Sociodemográficos Tabulares | Polígono AGEB | **Desfase Temporal:** El censo fue levantado en 2020. Al contrastar con datos térmicos de 2026, existe un desfase temporal de 6 años que no refleja el acelerado crecimiento demográfico y la expansión urbana de la periferia de Monterrey en los últimos años. |
-
-### 5.4. Variables Socioeconómicas y Pobreza (Próximos Pasos con el Censo Completo)  
-Dado que el Censo Decenal de Población y Vivienda del INEGI no recolecta ingresos económicos directos (por la alta tasa de omisión y subdeclaración), los estudios de vulnerabilidad socioambiental ante la isla de calor (SUHI) utilizan **variables proxy de bienestar material, educación e infraestructura**. 
-
-Una vez que se reemplace la base de datos censal por el **CSV completo de 230 columnas de INEGI**, el pipeline podrá incorporar automáticamente las siguientes variables socioeconómicas críticas para mapear la justicia distributiva del calor:
-
-1.  **Educación (`GRAPROES`):** *Grado Promedio de Escolaridad*. Es el estimador más fuerte y estable en México del nivel socioeconómico de la población en zonas urbanas. A mayor escolaridad, mayor capacidad de adaptación, mejor aislamiento térmico en viviendas y mayor acceso a aire acondicionado.
-2.  **Riqueza y Bienes (`VPH_AUTOMOV` y `VPH_INTERNET`):** *Porcentaje de viviendas con automóvil o acceso a Internet*. Actúan como indicadores directos de ingresos familiares medios y altos en la ZMM.
-3.  **Pobreza Extrema e Infraestructura (`VPH_ND_HU`):** *Porcentaje de viviendas particulares habitadas que no disponen de energía eléctrica, agua entubada ni drenaje*. Identifica directamente núcleos de pobreza extrema y precariedad habitacional extrema ante olas de calor.
-4.  **Vulnerabilidad Laboral (`PDER_SS`):** *Porcentaje de población sin afiliación a servicios de salud*. Identifica sectores con empleo informal y menores recursos para solventar complicaciones de salud derivadas del calor extremo.
+| **`lst_day_c`** | 30m / AGEB | Físico | Landsat 8 (B10) | Temperatura Superficial Terrestre diurna calibrada en grados Celsius (°C). |
+| **`green_pct`** | 30m / AGEB | Físico | Sentinel-2 | Porcentaje de vegetación verde activa de la celda (NDVI > 0.3). |
+| **`industrial_osm_pct`**| 30m / AGEB | Físico | OSM / GEE | Porcentaje de cobertura de uso de suelo industrial en la celda. |
+| **`suhi_day_c`** | 30m / AGEB | Físico | Calculado | **SUHI Diurna (°C)**. LST de la celda menos promedio rural de control local. |
+| **`dw_built_pct`** | 30m / AGEB | Físico | Dynamic World | Porcentaje de cobertura de superficie impermeable / edificada. |
+| **`dw_trees_pct`** | 30m / AGEB | Físico | Dynamic World | Porcentaje de cobertura de dosel forestal / árboles. |
+| **`POB65_MAS`** | AGEB | Social | INEGI 2020 | Población de adultos mayores vulnerables de 65 años o más. |
+| **`pop_density_ageb`** | AGEB | Social | INEGI / Calc | Densidad de población de la AGEB (habitantes por km²). |
