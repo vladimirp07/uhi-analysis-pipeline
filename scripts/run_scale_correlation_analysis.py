@@ -55,7 +55,10 @@ def print_step(step_num, title):
     print("="*80)
 
 def main():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
+    import sys
+    import pathlib
+    base_dir = str(pathlib.Path(__file__).resolve().parent.parent)
+    sys.path.append(base_dir)
     
     # -------------------------------------------------------------------------
     # PARTE 1: ANÁLISIS DE EFECTO DE ESCALA (MAUP)

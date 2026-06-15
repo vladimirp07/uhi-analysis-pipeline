@@ -16,7 +16,10 @@ import contextily as ctx
 from matplotlib.colors import TwoSlopeNorm, ListedColormap
 
 def main():
-    base_dir = r"C:\Users\Eydan\OneDrive\Escritorio\ITESM\MAITEC Lab\Islas de Calor\UHI_Analysis_pipeline_MVP_v1"
+    import sys
+    import pathlib
+    base_dir = str(pathlib.Path(__file__).resolve().parent.parent)
+    sys.path.append(base_dir)
     gpkg_path = os.path.join(base_dir, "outputs", "malla_gwr_coefficients_official_gwr.gpkg")
     ageb_path = os.path.join(base_dir, "data", "raw", "AGEB_ZMM_Dani.json")
     

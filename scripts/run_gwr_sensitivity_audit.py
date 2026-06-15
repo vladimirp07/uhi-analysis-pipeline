@@ -156,8 +156,11 @@ def analyze_single_model(gdf_sample, pred_cols, target_col, model_label):
     }
 
 def main():
-    base_dir = "."
-    gpkg_path = os.path.join(base_dir, "data", "processed", "malla_modelado_multiescala_mty.gpkg")
+    import sys
+    import pathlib
+    base_dir = pathlib.Path(__file__).resolve().parent.parent
+    sys.path.append(str(base_dir))
+    gpkg_path = os.path.join(str(base_dir), "data", "processed", "malla_modelado_multiescala_mty.gpkg")
     
     if not os.path.exists(gpkg_path):
         print(f"Error: No se encontró el archivo de datos {gpkg_path}")
@@ -186,8 +189,8 @@ def main():
     print(f"Celdas sin nulos en variables de interés: {len(gdf_clean)}")
     
     # Asegurar directorios
-    os.makedirs(os.path.join(base_dir, "outputs", "tables"), exist_ok=True)
-    os.makedirs(os.path.join(base_dir, "outputs", "reports"), exist_ok=True)
+    os.makedirs(os.path.join(str(base_dir), "outputs", "tables"), exist_ok=True)
+    os.makedirs(os.path.join(str(base_dir), "outputs", "reports"), exist_ok=True)
     
     # ==========================================
     # TAREA 2 & 3: Comparación de Modelos GWR Reducidos (Semilla 42, N = 5000)
@@ -233,7 +236,7 @@ def main():
         model_comparison_results.append(row)
         
     df_comparison = pd.DataFrame(model_comparison_results)
-    comparison_csv_path = os.path.join(base_dir, "outputs", "tables", "gwr_sensitivity_model_comparison.csv")
+    comparison_csv_path = os.path.join(str(base_dir), "outputs", "tables", "gwr_sensitivity_model_comparison.csv")
     df_comparison.to_csv(comparison_csv_path, index=False)
     print(f"\n[OK] Comparación guardada en: {comparison_csv_path}")
     
@@ -277,7 +280,7 @@ def main():
             stability_results.append(row)
             
     df_stability = pd.DataFrame(stability_results)
-    stability_csv_path = os.path.join(base_dir, "outputs", "tables", "gwr_sensitivity_seed_stability.csv")
+    stability_csv_path = os.path.join(str(base_dir), "outputs", "tables", "gwr_sensitivity_seed_stability.csv")
     df_stability.to_csv(stability_csv_path, index=False)
     print(f"\n[OK] Tabla de estabilidad guardada en: {stability_csv_path}")
     print("\nAuditoría de Sensibilidad GWR finalizada exitosamente.")

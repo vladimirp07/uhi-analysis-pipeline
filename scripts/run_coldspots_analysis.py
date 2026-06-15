@@ -16,7 +16,9 @@ def main():
     print("=" * 80)
 
     # 1. Cargar Datos
-    base_dir = pathlib.Path(__file__).parent.resolve()
+    import sys
+    base_dir = pathlib.Path(__file__).resolve().parent.parent
+    sys.path.append(str(base_dir))
     gpkg_path = base_dir / "data" / "processed" / "malla_modelado_multiescala_mty.gpkg"
     
     if not gpkg_path.exists():

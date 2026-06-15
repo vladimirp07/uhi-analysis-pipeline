@@ -29,7 +29,9 @@ def print_step(title):
     print("="*80)
 
 def main():
-    base_dir = pathlib.Path(__file__).parent.resolve()
+    import sys
+    base_dir = pathlib.Path(__file__).resolve().parent.parent
+    sys.path.append(str(base_dir))
     processed_dir = base_dir / "data" / "processed"
     interim_dir = base_dir / "data" / "interim"
     outputs_dir = base_dir / "outputs"

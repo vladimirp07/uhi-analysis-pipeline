@@ -7,9 +7,13 @@ def run_diagnostics():
     print("=== INICIANDO CORRIDA DE DIAGNÓSTICOS ===")
     
     # 1. Cargar datos
-    census_csv_path = "data/raw/RESAGEBURB2020 - 19 Nuevo León (1).csv"
-    ageb_geojson_path = "data/raw/AGEB_ZMM_Dani.json"
-    malla_v3_path = "data/processed/malla_maestra_mty_2026_v3.gpkg"
+    import sys
+    import pathlib
+    base_dir = pathlib.Path(__file__).resolve().parent.parent
+    sys.path.append(str(base_dir))
+    census_csv_path = base_dir / "data" / "raw" / "RESAGEBURB2020 - 19 Nuevo León (1).csv"
+    ageb_geojson_path = base_dir / "data" / "raw" / "AGEB_ZMM_Dani.json"
+    malla_v3_path = base_dir / "data" / "processed" / "malla_maestra_mty_2026_v3.gpkg"
     
     censo = pd.read_csv(census_csv_path)
     agebs = gpd.read_file(ageb_geojson_path)

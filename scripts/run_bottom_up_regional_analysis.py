@@ -45,7 +45,9 @@ def calculate_spearman(df, target_col, pred_col, min_samples=30):
         return np.nan, np.nan, len(sub)
 
 def main():
-    base_dir = pathlib.Path(__file__).parent.resolve()
+    import sys
+    base_dir = pathlib.Path(__file__).resolve().parent.parent
+    sys.path.append(str(base_dir))
     processed_dir = base_dir / "data" / "processed"
     outputs_dir = base_dir / "outputs"
     tables_dir = outputs_dir / "tables"
@@ -320,7 +322,7 @@ def main():
 
 def generate_markdown_report(df_muni, df_ageb, base_dir):
     """Genera un archivo markdown detallando los hallazgos de las 4 análisis"""
-    report_path = base_dir / "bottom_up_analysis_report.md"
+    report_path = base_dir / "reports" / "bottom_up_analysis_report.md"
     
     muni_global_green = df_muni[(df_muni['segmento_densidad'] == 'Global') & (df_muni['bloque'] == 'mitigacion') & (df_muni['variable'] == 'green_pct')].sort_values(by='spearman_r')
     muni_global_green500 = df_muni[(df_muni['segmento_densidad'] == 'Global') & (df_muni['bloque'] == 'mitigacion') & (df_muni['variable'] == 'green_pct_500m')].sort_values(by='spearman_r')
