@@ -4,9 +4,9 @@ Este documento presenta los resultados de la modelación estadística de la Isla
 ---
 
 ## 1. Síntesis Ejecutiva de Hallazgos
-1. **Diferenciación de Regímenes Térmicos**: La vegetación muestra asociaciones negativas consistentes con la intensidad de la SUHI (asociación biofísica de enfriamiento), principalmente en áreas periurbanas de baja densidad. Por el contrario, la densidad de zonas industriales exhibe fuertes asociaciones positivas con las anomalías térmicas (presión de calor).
+1. **Diferenciación de Regímenes Térmicos**: La vegetación presenta asociaciones negativas con la SUHI, principalmente en zonas de baja densidad, mientras que la industria muestra asociaciones positivas, especialmente en San Nicolás y sectores de Monterrey. Esto permite distinguir entre variables asociadas a enfriamiento y variables asociadas a presión térmica.
 2. **Escalas de Asociación Variable**: Los resultados muestran que las asociaciones más intensas tienden a aparecer en escalas intermedias y amplias, especialmente entre 250 m y 1000 m, aunque la escala dominante cambia según municipio, densidad y tipo de variable.
-3. **Efecto de Saturación en Áreas Densas**: Al segmentar los vecindarios (AGEBs) por su densidad de suelo construido, se confirma que en las zonas de alta densidad (>= 60%), la correlación negativa entre la vegetación local y la SUHI diurna disminuye a valores estadísticamente no significativos ($r \approx -0.05$). Esto sugiere que en entornos saturados de concreto, la reforestación aislada no muestra asociación estadística con la reducción de la temperatura superficial.
+3. **Efecto de Saturación en Áreas Densas**: Al segmentar los vecindarios (AGEBs) por su densidad de suelo construido, se observa que en las zonas de alta densidad (>= 60%), la correlación negativa entre la vegetación local y la SUHI diurna disminuye a valores estadísticamente no significativos ($r \approx -0.05$). Los resultados sugieren que en entornos saturados de concreto, la reforestación aislada no muestra asociación estadística significativa con la reducción de la temperatura superficial.
 
 ---
 
@@ -37,38 +37,40 @@ Correlaciones globales de Spearman ($r$) entre la SUHI diurna (`suhi_day_c`) y l
 ### 2.2. Coeficientes de Vegetación (Mitigación) por Densidad y Escala de Buffer
 Comparación de coeficientes de Spearman ($r$) para el bloque de Mitigación (Vegetación) a diferentes escalas de buffer segmentados por la densidad construida de cada municipio:
 
-| Municipio | Zona de Densidad | Local (30m) | Buffer 100m | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| San Pedro Garza García | Baja | **-0.781** | **-0.811** | **-0.806** | **-0.779** | **-0.720** |
-| San Pedro Garza García | Media | -0.319 | **-0.374** | -0.278 | -0.171 | -0.121 |
-| San Pedro Garza García | Alta | -0.116 | -0.201 | -0.202 | -0.170 | -0.133 |
-| Guadalupe | Baja | -0.278 | **-0.567** | **-0.645** | **-0.644** | **-0.676** |
-| Guadalupe | Media | -0.150 | -0.234 | -0.255 | -0.190 | -0.104 |
-| Guadalupe | Alta | -0.042 | -0.048 | +0.037 | +0.114 | +0.335 |
-| San Nicolás de los Garza | Baja | **-0.536** | **-0.592** | **-0.632** | **-0.674** | **-0.618** |
-| San Nicolás de los Garza | Media | -0.091 | -0.137 | -0.138 | -0.135 | -0.086 |
-| San Nicolás de los Garza | Alta | -0.083 | -0.140 | -0.120 | -0.079 | +0.044 |
-| Monterrey | Baja | **-0.489** | **-0.609** | **-0.611** | **-0.522** | -0.140 |
-| Monterrey | Media | -0.133 | -0.179 | -0.162 | -0.137 | -0.069 |
-| Monterrey | Alta | -0.026 | -0.022 | +0.028 | +0.063 | +0.120 |
+| Municipio | Zona de Densidad | Celdas (N) | Local (30m) | Buffer 100m | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| San Pedro Garza García | Baja | 1,723 | **-0.781** | **-0.811** | **-0.806** | **-0.779** | **-0.720** |
+| San Pedro Garza García | Media | 2,298 | -0.319 | **-0.374** | -0.278 | -0.171 | -0.121 |
+| San Pedro Garza García | Alta | 19,196 | -0.116 | -0.201 | -0.202 | -0.170 | -0.133 |
+| Guadalupe | Baja | 1,510 | -0.278 | **-0.567** | **-0.645** | **-0.644** | **-0.676** |
+| Guadalupe | Media | 3,248 | -0.150 | -0.234 | -0.255 | -0.190 | -0.104 |
+| Guadalupe | Alta | 16,562 | -0.042 | -0.048 | +0.037 | +0.114 | +0.335 |
+| San Nicolás de los Garza | Baja | 120 | **-0.536** | **-0.592** | **-0.632** | **-0.674** | **-0.618** |
+| San Nicolás de los Garza | Media | 6,360 | -0.091 | -0.137 | -0.138 | -0.135 | -0.086 |
+| San Nicolás de los Garza | Alta | 19,529 | -0.083 | -0.140 | -0.120 | -0.079 | +0.044 |
+| Monterrey | Baja | 3,129 | **-0.489** | **-0.609** | **-0.611** | **-0.522** | -0.140 |
+| Monterrey | Media | 14,438 | -0.133 | -0.179 | -0.162 | -0.137 | -0.069 |
+| Monterrey | Alta | 90,177 | -0.026 | -0.022 | +0.028 | +0.063 | +0.120 |
 
 ### 2.3. Coeficientes de la Industria (Presión Térmica) por Densidad y Escala de Buffer
 Comparación de coeficientes de Spearman ($r$) para el bloque de Presión Térmica (Industria OSM) a diferentes escalas de buffer segmentados por la densidad construida de cada municipio:
 
-| Municipio | Zona de Densidad | Local (30m) | Buffer 100m | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| San Pedro Garza García | Baja | N/D | N/D | +0.079 | **+0.260** | **+0.579** |
-| San Pedro Garza García | Media | N/D | +0.043 | +0.224 | **+0.288** | **+0.565** |
-| San Pedro Garza García | Alta | -0.013 | -0.031 | -0.066 | -0.063 | +0.029 |
-| Guadalupe | Baja | N/D | +0.047 | +0.093 | +0.205 | **+0.256** |
-| Guadalupe | Media | +0.066 | +0.066 | +0.089 | +0.038 | -0.025 |
-| Guadalupe | Alta | -0.030 | -0.049 | -0.129 | -0.271 | -0.378 |
-| San Nicolás de los Garza | Baja | **+0.573** | **+0.595** | **+0.624** | **+0.630** | **+0.643** |
-| San Nicolás de los Garza | Media | **+0.405** | **+0.444** | **+0.443** | **+0.439** | **+0.424** |
-| San Nicolás de los Garza | Alta | **+0.411** | **+0.473** | **+0.500** | **+0.505** | **+0.469** |
-| Monterrey | Baja | -0.009 | +0.104 | **+0.379** | **+0.540** | **+0.596** |
-| Monterrey | Media | **+0.253** | **+0.316** | **+0.361** | **+0.374** | **+0.304** |
-| Monterrey | Alta | +0.093 | +0.116 | +0.124 | +0.088 | +0.021 |
+| Municipio | Zona de Densidad | Celdas (N) | Local (30m) | Buffer 100m | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| San Pedro Garza García | Baja | 1,723 | N/D | N/D | +0.079 | **+0.260** | **+0.579** |
+| San Pedro Garza García | Media | 2,298 | N/D | +0.043 | +0.224 | **+0.288** | **+0.565** |
+| San Pedro Garza García | Alta | 19,196 | -0.013 | -0.031 | -0.066 | -0.063 | +0.029 |
+| Guadalupe | Baja | 1,510 | N/D | +0.047 | +0.093 | +0.205 | **+0.256** |
+| Guadalupe | Media | 3,248 | +0.066 | +0.066 | +0.089 | +0.038 | -0.025 |
+| Guadalupe | Alta | 16,562 | -0.030 | -0.049 | -0.129 | -0.271 | -0.378 |
+| San Nicolás de los Garza | Baja | 120 | **+0.573** | **+0.595** | **+0.624** | **+0.630** | **+0.643** |
+| San Nicolás de los Garza | Media | 6,360 | **+0.405** | **+0.444** | **+0.443** | **+0.439** | **+0.424** |
+| San Nicolás de los Garza | Alta | 19,529 | **+0.411** | **+0.473** | **+0.500** | **+0.505** | **+0.469** |
+| Monterrey | Baja | 3,129 | -0.009 | +0.104 | **+0.379** | **+0.540** | **+0.596** |
+| Monterrey | Media | 14,438 | **+0.253** | **+0.316** | **+0.361** | **+0.374** | **+0.304** |
+| Monterrey | Alta | 90,177 | +0.093 | +0.116 | +0.124 | +0.088 | +0.021 |
+
+*Nota: N/D indica que no existió suficiente variabilidad espacial de la variable industrial dentro del subconjunto analizado para calcular una correlación estable.*
 
 ---
 
@@ -110,4 +112,4 @@ Este Geopackage está listo para ser cargado en QGIS o ArcGIS para la generació
    En áreas urbanas altamente consolidadas (densidad construida $\ge 60\%$) de los cuatro municipios analizados, la correlación negativa entre la vegetación local y la SUHI diurna tiende a ser cercana a cero ($r \approx -0.05$). Esto sugiere que en entornos saturados de concreto, la arborización dispersa tiene una asociación estadística muy débil con el enfriamiento superficial. En estas zonas se debe priorizar la mitigación pasiva mediante la modificación de la materialidad urbana (aumento de albedo en techos, fachadas y pavimentos fríos) para contrarrestar la inercia térmica.
 
 3. **Planificación de Infraestructura Verde a Escala de Vecindario**:
-   En áreas residenciales de densidad media, la asociación biofísica negativa con la vegetación es más intensa a escalas de vecindario (buffers de 250 m a 500 m) que a escala local inmediata (30 m). Por ende, las estrategias de arborización urbana deben estructurarse en torno a parques de vecindario distribuidos que cubran un radio de influencia de hasta 500 m, maximizando así la correlación con la disminución del calor superficial acumulado.
+   En áreas residenciales de densidad media, la asociación biofísica negativa con la vegetación es más intensa a escalas de vecindario (buffers de 250 m a 500 m) que a escala local inmediata (30 m). Por ende, se sugiere el desarrollo de parques y corredores verdes de escala barrial, priorizando radios de influencia entre 250 m y 500 m, y evaluando extensiones mayores en zonas donde los buffers amplios muestran mayor asociación.

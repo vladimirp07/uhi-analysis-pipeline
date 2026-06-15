@@ -341,9 +341,9 @@ Este documento presenta los resultados de la modelación estadística de la Isla
 ---
 
 ## 1. Síntesis Ejecutiva de Hallazgos
-1. **Diferenciación de Regímenes Térmicos**: La vegetación muestra asociaciones negativas consistentes con la intensidad de la SUHI (asociación biofísica de enfriamiento), principalmente en áreas periurbanas de baja densidad. Por el contrario, la densidad de zonas industriales exhibe fuertes asociaciones positivas con las anomalías térmicas (presión de calor).
+1. **Diferenciación de Regímenes Térmicos**: La vegetación presenta asociaciones negativas con la SUHI, principalmente en zonas de baja densidad, mientras que la industria muestra asociaciones positivas, especialmente en San Nicolás y sectores de Monterrey. Esto permite distinguir entre variables asociadas a enfriamiento y variables asociadas a presión térmica.
 2. **Escalas de Asociación Variable**: Los resultados muestran que las asociaciones más intensas tienden a aparecer en escalas intermedias y amplias, especialmente entre 250 m y 1000 m, aunque la escala dominante cambia según municipio, densidad y tipo de variable.
-3. **Efecto de Saturación en Áreas Densas**: Al segmentar los vecindarios (AGEBs) por su densidad de suelo construido, se confirma que en las zonas de alta densidad (>= 60%), la correlación negativa entre la vegetación local y la SUHI diurna disminuye a valores estadísticamente no significativos ($r \approx -0.05$). Esto sugiere que en entornos saturados de concreto, la reforestación aislada no muestra asociación estadística con la reducción de la temperatura superficial.
+3. **Efecto de Saturación en Áreas Densas**: Al segmentar los vecindarios (AGEBs) por su densidad de suelo construido, se observa que en las zonas de alta densidad (>= 60%), la correlación negativa entre la vegetación local y la SUHI diurna disminuye a valores estadísticamente no significativos ($r \approx -0.05$). Los resultados sugieren que en entornos saturados de concreto, la reforestación aislada no muestra asociación estadística significativa con la reducción de la temperatura superficial.
 
 ---
 
@@ -389,8 +389,8 @@ Correlaciones globales de Spearman ($r$) entre la SUHI diurna (`suhi_day_c`) y l
 Comparación de coeficientes de Spearman ($r$) para el bloque de Mitigación (Vegetación) a diferentes escalas de buffer segmentados por la densidad construida de cada municipio:
 
 """)
-        f.write("| Municipio | Zona de Densidad | Local (30m) | Buffer 100m | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |\n")
-        f.write("| :--- | :--- | :---: | :---: | :---: | :---: | :---: |\n")
+        f.write("| Municipio | Zona de Densidad | Celdas (N) | Local (30m) | Buffer 100m | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |\n")
+        f.write("| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |\n")
         
         for muni in muni_global_green['municipio'].unique():
             for dens in ['Baja', 'Media', 'Alta']:
@@ -416,15 +416,16 @@ Comparación de coeficientes de Spearman ($r$) para el bloque de Mitigación (Ve
                         return f"**{s}**" if val < -0.35 else s
                     return "N/D"
                 
-                f.write(f"| {muni} | {dens} | {highlight(l_val)} | {highlight(r100_val)} | {highlight(r250_val)} | {highlight(r500_val)} | {highlight(r1000_val)} |\n")
+                n_cells = int(df_sub['n_celdas'].values[0]) if len(df_sub) > 0 else 0
+                f.write(f"| {muni} | {dens} | {n_cells:,} | {highlight(l_val)} | {highlight(r100_val)} | {highlight(r250_val)} | {highlight(r500_val)} | {highlight(r1000_val)} |\n")
 
         f.write("""
 ### 2.3. Coeficientes de la Industria (Presión Térmica) por Densidad y Escala de Buffer
 Comparación de coeficientes de Spearman ($r$) para el bloque de Presión Térmica (Industria OSM) a diferentes escalas de buffer segmentados por la densidad construida de cada municipio:
 
 """)
-        f.write("| Municipio | Zona de Densidad | Local (30m) | Buffer 100m | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |\n")
-        f.write("| :--- | :--- | :---: | :---: | :---: | :---: | :---: |\n")
+        f.write("| Municipio | Zona de Densidad | Celdas (N) | Local (30m) | Buffer 100m | Buffer 250m | Buffer 500m | Buffer 1000m (1km) |\n")
+        f.write("| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |\n")
         
         for muni in muni_global_green['municipio'].unique():
             for dens in ['Baja', 'Media', 'Alta']:
@@ -450,7 +451,10 @@ Comparación de coeficientes de Spearman ($r$) para el bloque de Presión Térmi
                         return f"**{s}**" if val > +0.25 else s
                     return "N/D"
                 
-                f.write(f"| {muni} | {dens} | {highlight_ind(l_val)} | {highlight_ind(r100_val)} | {highlight_ind(r250_val)} | {highlight_ind(r500_val)} | {highlight_ind(r1000_val)} |\n")
+                n_cells = int(df_sub['n_celdas'].values[0]) if len(df_sub) > 0 else 0
+                f.write(f"| {muni} | {dens} | {n_cells:,} | {highlight_ind(l_val)} | {highlight_ind(r100_val)} | {highlight_ind(r250_val)} | {highlight_ind(r500_val)} | {highlight_ind(r1000_val)} |\n")
+        
+        f.write("\n*Nota: N/D indica que no existió suficiente variabilidad espacial de la variable industrial dentro del subconjunto analizado para calcular una correlación estable.*\n")
 
         f.write("""
 ---
@@ -496,7 +500,7 @@ Este Geopackage está listo para ser cargado en QGIS o ArcGIS para la generació
    En áreas urbanas altamente consolidadas (densidad construida $\ge 60\%$) de los cuatro municipios analizados, la correlación negativa entre la vegetación local y la SUHI diurna tiende a ser cercana a cero ($r \approx -0.05$). Esto sugiere que en entornos saturados de concreto, la arborización dispersa tiene una asociación estadística muy débil con el enfriamiento superficial. En estas zonas se debe priorizar la mitigación pasiva mediante la modificación de la materialidad urbana (aumento de albedo en techos, fachadas y pavimentos fríos) para contrarrestar la inercia térmica.
 
 3. **Planificación de Infraestructura Verde a Escala de Vecindario**:
-   En áreas residenciales de densidad media, la asociación biofísica negativa con la vegetación es más intensa a escalas de vecindario (buffers de 250 m a 500 m) que a escala local inmediata (30 m). Por ende, las estrategias de arborización urbana deben estructurarse en torno a parques de vecindario distribuidos que cubran un radio de influencia de hasta 500 m, maximizando así la correlación con la disminución del calor superficial acumulado.
+   En áreas residenciales de densidad media, la asociación biofísica negativa con la vegetación es más intensa a escalas de vecindario (buffers de 250 m a 500 m) que a escala local inmediata (30 m). Por ende, se sugiere el desarrollo de parques y corredores verdes de escala barrial, priorizando radios de influencia entre 250 m y 500 m, y evaluando extensiones mayores en zonas donde los buffers amplios muestran mayor asociación.
 """)
         
     print(f"[Report] Reporte técnico markdown generado en: {report_path}")
