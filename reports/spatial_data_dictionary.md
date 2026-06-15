@@ -53,7 +53,7 @@ Capa vectorial: `data/processed/malla_modelado_multiescala_mty.gpkg`
 | Columna | Tipo | Origen | Descripción Técnica y Fórmula |
 | :--- | :---: | :---: | :--- |
 | **`lst_day_c`** / **`lst_c`** | Flotante | Landsat 8 (TIRS) | Temperatura de Superficie Terrestre (LST) diurna promedio de primavera en grados Celsius (°C), calibrada a partir de la Banda 10 mediante algoritmo de emisividad. |
-| **`suhi_day_c`** / **`suhi_c`** | Flotante | Calculado | **SUHI Diurna (°C)**. Intensidad de la Isla de Calor: $\text{SUHI}_i = \text{LST}_i - \text{LST}_{\text{rural\_control}}$, donde $\text{LST}_{\text{rural\_control}}$ es el promedio térmico medido en 3 zonas rurales boscosas de control de la periferia. |
+| **`suhi_day_c`** / **`suhi_c`** | Flotante | Calculado | **SUHI Diurna (°C)**. Intensidad de la Isla de Calor: $\text{SUHI}_i = \text{LST}_i - \text{LST}_{\text{rural}}$, donde $\text{LST}_{\text{rural}}$ es el promedio térmico medido en 3 zonas rurales boscosas de control de la periferia. |
 | **`distance_to_industry_osm_m`**| Flotante | OSM / Calc | Distancia euclidiana mínima en metros (m) desde el centroide de la celda a la huella industrial más cercana de OSM. |
 | **`distance_to_ternium_m`** | Flotante | Point / Calc | Distancia euclidiana en metros a la coordenada de la planta Ternium Guerrero (`Point(-100.299792, 25.720855)`). |
 | **`distance_to_water_m`** | Flotante | OSM / Calc | Distancia euclidiana mínima en metros a cuerpos de agua mapeados en OSM. |
@@ -84,10 +84,10 @@ Capa vectorial: `data/processed/ageb_correlaciones_sensibilidad.gpkg`
 | **`POB0_14`** | Entero | Censo 2020 | Población infantil de 0 a 14 años de edad en la AGEB. |
 | **`POB65_MAS`** | Entero | Censo 2020 | Población adulta vulnerable de 65 años o más en la AGEB. |
 | **`P_60YMAS`** | Entero | Censo 2020 | Población adulta de 60 años o más en la AGEB. |
-| **`pop_density_ageb`** | Flotante | INEGI / Calc | Densidad de población: $\text{POBTOT} / \text{area\_km2}$ (Habitantes/$\text{km}^2$). |
-| **`pct_0_14`** | Flotante | INEGI / Calc | Porcentaje de población infantil: $(\text{POB0\_14} / \text{POBTOT}) \times 100$. |
-| **`pct_65_mas`** | Flotante | INEGI / Calc | Porcentaje de población vulnerable de la tercera edad: $(\text{POB65\_MAS} / \text{POBTOT}) \times 100$. |
-| **`pct_60ymas`** | Flotante | INEGI / Calc | Porcentaje de población mayor de 60 años: $(\text{P\_60YMAS} / \text{POBTOT}) \times 100$. |
+| **`pop_density_ageb`** | Flotante | INEGI / Calc | Densidad de población: `POBTOT / area_km2` (Habitantes/$\text{km}^2$). |
+| **`pct_0_14`** | Flotante | INEGI / Calc | Porcentaje de población infantil: `(POB0_14 / POBTOT) * 100`. |
+| **`pct_65_mas`** | Flotante | INEGI / Calc | Porcentaje de población vulnerable de la tercera edad: `(POB65_MAS / POBTOT) * 100`. |
+| **`pct_60ymas`** | Flotante | INEGI / Calc | Porcentaje de población mayor de 60 años: `(P_60YMAS / POBTOT) * 100`. |
 
 ### 3.2. Variables de Sensibilidad Espacial (Coeficientes de Spearman a escala AGEB)
 *Estas variables representan los coeficientes de Spearman ($r$) calculados pixel a pixel sobre las celdas internas de cada AGEB de forma individual.*
