@@ -1,6 +1,6 @@
-# Pipeline de Análisis Multitemporal de Islas de Calor Urbanas Superficiales (SUHI) en la Zona Metropolitana de Monterrey (2026)
+# Islas de Calor en la Zona Metropolitana de Monterrey
 
-Este repositorio alberga el **Producto Mínimo Viable (MVP) v1** del pipeline de análisis geoespacial, biofísico y socioambiental de la **Isla de Calor Urbana Superficial (SUHI - Surface Urban Heat Island)** en la Zona Metropolitana de Monterrey (ZMM) para el año **2026**.
+Este repositorio alberga el pipeline de análisis geoespacial, biofísico y socioambiental de la **Isla de Calor Urbana Superficial (SUHI - Surface Urban Heat Island)** en la Zona Metropolitana de Monterrey (ZMM) para el año **2026**.
 
 El pipeline está diseñado de manera paramétrica y modular, funcionando como un **validador analítico clave para la misión de un nanosatélite de monitoreo térmico**. Permite verificar y calibrar en tierra los patrones espaciales de anomalías térmicas (SUHI) y su relación con coberturas de suelo y proximidad industrial.
 
@@ -24,7 +24,7 @@ La documentación detallada del proyecto se encuentra centralizada y estructurad
 *   **[TECHNICAL_NOTES.md](./docs/private/TECHNICAL_NOTES.md):** Notas detalladas sobre bugs resueltos (proyección sinusoidal de MODIS nocturno en GEE) y estabilidad de semillas GWR.
 *   **[RESULTS_INTERPRETATION_NOTES.md](./docs/private/RESULTS_INTERPRETATION_NOTES.md):** Discusión de patrones territoriales (spillover intermunicipal, saturación de concreto e injusticia ambiental).
 *   **[TODO_RESTART_CHECKLIST.md](./docs/private/TODO_RESTART_CHECKLIST.md):** Lista de verificación para reactivar el entorno y volver a correr el pipeline rápidamente.
-*   **[CLOSING_REPORT.md](./docs/private/CLOSING_REPORT.md):** Resumen final de cierre y entrega del MVP v1.
+*   **[CLOSING_REPORT.md](./docs/private/CLOSING_REPORT.md):** Resumen final de cierre y entrega de la primera versión del pipeline.
 
 ---
 

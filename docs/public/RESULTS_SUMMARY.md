@@ -1,6 +1,6 @@
-# Resumen de Resultados Analíticos del Proyecto SUHI de la Zona Metropolitana de Monterrey (Versión Oficial Depurada)
+# Resumen de Resultados Analíticos: Islas de Calor en la Zona Metropolitana de Monterrey
 
-Este documento presenta una síntesis estructurada de los resultados del proyecto de análisis de la Isla de Calor Urbana Superficial (SUHI) diurna y nocturna en la Zona Metropolitana de Monterrey (ZMM). La estructura de este resumen sigue el orden y flujo de las fases de procesamiento y modelación del pipeline metodológico implementado para facilitar su consulta y comprensión.
+Este documento presenta una síntesis estructurada de los resultados obtenidos en el análisis de la distribución espacial y temporal de las islas de calor en la Zona Metropolitana de Monterrey (ZMM). La estructura de este resumen sigue el orden y flujo de las fases de procesamiento y modelación del pipeline metodológico implementado para facilitar su consulta y comprensión.
 
 ---
 
@@ -21,23 +21,30 @@ Este documento presenta una síntesis estructurada de los resultados del proyect
 
 Para evaluar la heterogeneidad espacial y mitigar el Problema de la Unidad de Área Modificable (MAUP), se calcularon coeficientes de correlación de rangos de Spearman ($r$) sobre variables de mitigación (vegetación `green_pct`) y presión térmica (industria `industrial_osm_pct`) a escala local (celda de 30m) y en buffers radiales de vecindario (100m, 250m, 500m, 1000m y 3000m).
 
-### A. Coeficientes Globales a Nivel de Municipio
+### A. Altos Índices de Correlación Espacial Encontrados
+El análisis exploratorio de datos (EDA) ha revelado asociaciones de magnitud muy alta al segmentar territorialmente por municipios y tipos de vecindario:
 *   **Bloque de Mitigación (Vegetación vs SUHI Diurna)**:
-    *   **San Pedro Garza García**: Muestra la asociación negativa más robusta de la ZMM, con un coeficiente de **-0.239** a nivel local (30m) y de **-0.247** a escala de vecindario (500m), consistente con su estructura de arbolado de vecindario.
-    *   **Guadalupe**: Registra un coeficiente de **-0.210** a nivel local (30m), que se debilita a -0.062 a escala de vecindario (500m).
-    *   **Monterrey y San Nicolás**: Presentan coeficientes globales locales débiles (-0.068 y -0.088 respectivamente), indicando que el análisis agregado global oculta dinámicas internas.
+    *   **San Pedro Garza García (Zonas de Baja Densidad)**: Se hallaron **altos índices de correlación negativa** que demuestran la fuerza de la asociación entre la infraestructura verde de vecindario y la atenuación de la anomalía de calor superficial. El coeficiente alcanza **-0.781** a nivel local (30m) y se intensifica hasta **-0.811** a escala de buffer de 100m.
+    *   **Guadalupe (Zonas de Baja Densidad)**: La correlación de la vegetación local con la anomalía es de -0.278, pero se incrementa fuertemente hasta **-0.645** en buffer de 250m y **-0.676** a escala de 1000m, evidenciando un efecto acumulativo de vecindario.
+    *   **Monterrey (Zonas de Baja Densidad)**: Registra una asociación negativa de **-0.489** local y **-0.611** en buffer de 250m.
 *   **Bloque de Presión Térmica (Industria vs SUHI Diurna)**:
-    *   **San Nicolás de los Garza**: Registra la mayor asociación positiva global con la SUHI diurna, situándose en **+0.409** a nivel local (30m) y ascendiendo a **+0.493** a escala de vecindario (500m), confirmando el rol térmico de sus extensos distritos industriales.
-    *   **Monterrey**: Presenta un coeficiente positivo de **+0.121** local y de **+0.149** a 500m.
+    *   **San Nicolás de los Garza**: Muestra la asociación positiva más fuerte y persistente con la SUHI diurna en todas sus escalas y zonas de densidad (ej. zonas residenciales de baja densidad colindantes con industria: **+0.573** local y **+0.643** a 1000m; zonas industriales consolidadas: **+0.411** local y **+0.505** a 500m).
+    *   **Monterrey (Zonas de Media Densidad)**: Registra una correlación positiva de **+0.253** local y **+0.374** en buffer de 500m.
 
 ### B. Regímenes Microclimáticos según Densidad de Suelo Construido (Dynamic World)
 La segmentación de las correlaciones por la fracción de impermeabilidad de la celda (`dw_built_pct`) revela tres comportamientos espaciales diferenciados en la ZMM:
 1.  **Baja Densidad (<20% de suelo edificado)**:
-    *   Existe una correlación negativa intensa y significativa entre la vegetación de vecindario y la SUHI diurna (ej. San Pedro: **-0.811** en buffer de 100m y **-0.779** en buffer de 500m; Monterrey: **-0.611** en buffer de 250m). Esto confirma que en áreas abiertas o residenciales suburbanas, el incremento de la cobertura verde se asocia fuertemente con un descenso de la temperatura local.
+    *   Fuerte sensibilidad al enfriamiento por cobertura verde (como se constata con los altos índices de correlación de -0.61 a -0.81).
 2.  **Media Densidad (20-60% de suelo edificado)**:
-    *   Representa un régimen de transición. El efecto de asociación de la vegetación disminuye (San Pedro: -0.278 a 250m; Guadalupe: -0.255 a 250m), mientras que la proximidad industrial y la cobertura edificada local comienzan a ejercer una presión térmica directa (ej. Monterrey: **+0.361** en buffer industrial de 250m; San Nicolás: **+0.443** en buffer industrial de 250m).
+    *   Régimen de transición. El efecto de asociación de la vegetación disminuye (San Pedro: -0.278 a 250m), mientras que la proximidad industrial y la cobertura edificada local comienzan a ejercer una presión térmica directa (ej. Monterrey: **+0.361** en buffer industrial de 250m).
 3.  **Alta Densidad (>=60% de suelo edificado)**:
-    *   **Saturación Térmica (Efecto Domo de Concreto)**: En las áreas de alta densidad de construcción, las variables de vegetación bidimensionales pierden significancia estadística (coeficientes de Spearman locales cercanos a cero: Guadalupe **-0.042**, Monterrey **-0.026**, San Nicolás **-0.083**). Los resultados sugieren que la reforestación aislada en áreas densamente construidas no se asocia estadísticamente con un descenso de la temperatura superficial local, requiriendo estrategias pasivas basadas en la materialidad (albedos, techos fríos).
+    *   **Saturación Térmica (Efecto Domo de Concreto)**: Las variables de vegetación bidimensionales pierden significancia estadística (coeficientes de Spearman locales cercanos a cero: Guadalupe **-0.042**, Monterrey **-0.026**). Esto sugiere que la reforestación aislada en áreas densamente construidas no se asocia estadísticamente con un descenso de la temperatura superficial local.
+
+### C. Integración de Nuevas Variables en Proceso
+Para superar las limitaciones del modelado bidimensional (saturación en alta densidad) y enriquecer la precisión microclimática del modelo, se está trabajando en la integración de nuevas variables territoriales y biofísicas:
+*   **Geometría Urbana 3D (Sky View Factor y Altura de Edificaciones)**: Para modelar el atrapamiento de radiación y el sombreado en cañones urbanos.
+*   **Propiedades de Materiales (Albedo y Emisividad Térmica)**: Para caracterizar pavimentos, asfalto y techumbres.
+*   **Inercia y Almacenamiento Térmico**: Para calibrar el flujo de calor almacenado diurno que se libera durante la noche.
 
 ---
 

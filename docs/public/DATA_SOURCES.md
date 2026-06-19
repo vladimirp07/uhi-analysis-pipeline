@@ -10,7 +10,7 @@ Este documento describe de manera rigurosa las fuentes de datos primarias, senso
 *   **Variable Objetivo:** Temperatura Superficial Terrestre (LST) diurna (°C).
 *   **Resolución Espacial:** Nativa de **100 m**, remuestreada a **30 m** por el USGS mediante interpolación cúbica para alineación con las bandas ópticas.
 *   **Temporalidad:** Compuestos mensuales y estacionales para el periodo histórico de **enero de 2025 a junio de 2026** (utilizados en la serie temporal) y medianas de primavera de 2026.
-*   **Uso:** Extracción de evolución de LST y análisis de consistencia multitemporal.
+*   **Uso:** Extracción de evolución de LST y análisis de consistencia espacio-temporal.
 *   **Limitación Técnica:** El tamaño nativo del píxel térmico (100m) provoca un efecto de suavizado espacial, lo que impide caracterizar anomalías de calor hiper-locales (como la inercia térmica de naves industriales individuales o encajonamientos viales de menos de 100m de ancho).
 
 ### B. Sentinel-2 MSI (Multispectral Instrument) - ESA

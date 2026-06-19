@@ -1,17 +1,22 @@
-# Pipeline de Análisis Multitemporal de Islas de Calor Urbanas Superficiales (SUHI) en la Zona Metropolitana de Monterrey
+# Islas de Calor en la Zona Metropolitana de Monterrey
 
-Este documento sirve como el punto de partida oficial para la documentación pública del **Producto Mínimo Viable (MVP) v1** del pipeline de análisis geoespacial, biofísico y socioambiental de la **Isla de Calor Urbana Superficial (SUHI - Surface Urban Heat Island)** en la Zona Metropolitana de Monterrey (ZMM).
+Este documento sirve como el punto de partida oficial para la documentación pública del pipeline de análisis geoespacial, biofísico y socioambiental de la Isla de Calor Urbana Superficial (SUHI) en la Zona Metropolitana de Monterrey (ZMM).
 
-El pipeline está diseñado de manera paramétrica y modular para funcionar como un **validador analítico clave en tierra para misiones de monitoreo térmico satelital**, permitiendo verificar y modelar con alta resolución espacial (30 metros) los patrones de anomalías térmicas urbanas y su correlación con las coberturas del suelo, la morfología urbana y la cercanía a infraestructura industrial.
+El pipeline está diseñado de manera paramétrica y modular para funcionar como un validador analítico clave en tierra para misiones de monitoreo térmico satelital, permitiendo verificar y modelar con alta resolución espacial (30 metros) los patrones de anomalías térmicas urbanas y su correlación espacio-temporal con las coberturas del suelo, la morfología urbana y la cercanía a infraestructura industrial.
 
 ---
 
 ## 1. Objetivos del Proyecto
 
-*   **Modelación Multiescala de la SUHI:** Cuantificar la anomalía térmica diurna y nocturna a nivel de celda física de 30m, evaluando el comportamiento del calor acumulado a escala local, de vecindario (buffers radiales) y por límites político-administrativos (Municipios y AGEB).
-*   **Identificación de Patrones de Mitigación y Presión Térmica:** Analizar la asociación estadística del arbolado urbano e infraestructura verde (bloque de mitigación) frente a la superficie impermeable y naves industriales (bloque de calentamiento).
-*   **Delimitación y Priorización de Zonas Críticas:** Aplicar algoritmos de clustering espacial para aislar núcleos de calor extremo (hotspots) e islas de frío urbano (coldspots) dentro de la trama urbana, y priorizar intervenciones mediante índices físicos.
-*   **Determinación de Vulnerabilidad Socio-Térmica:** Integrar microclimas térmicos con datos del Censo de Población y Vivienda INEGI 2020 para identificar patrones de injusticia ambiental y exposición demográfica en vecindarios marginados.
+### General
+Analizar la distribución espacial y temporal de las islas de calor en la Zona Metropolitana de Monterrey y evaluar su relación con variables físicas, urbanas, ambientales y socioeconómicas, con el fin de entender el fenómeno y proponer estrategias de mitigación localizadas.
+
+### Específicos
+1. Identificar islas de calor superficiales en la ZMM.
+2. Estudiar su comportamiento espacial y temporal a nivel estacional e histórico.
+3. Evaluar la correlación de variables físicas, urbanas y ambientales con la aparición e intensidad de las islas de calor.
+4. Integrar variables socioeconómicas para analizar vulnerabilidad territorial y exposición de la población.
+5. Construir una base metodológica para construir un modelo microclimático que guíe la planificación del desarrollo urbano sostenible frente al calentamiento local.
 
 ---
 
