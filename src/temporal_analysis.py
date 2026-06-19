@@ -233,6 +233,7 @@ def run_temporal_extraction():
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %y'))
     plt.xticks(rotation=0)
     plt.legend(loc="upper left", frameon=True, facecolor="white", edgecolor="none", shadow=False)
+    plt.grid(False)
     plt.tight_layout()
     
     lst_plot_path = out_dir / "05_lst_temporal_evolution.png"
@@ -266,6 +267,7 @@ def run_temporal_extraction():
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %y'))
     plt.xticks(rotation=0)
     plt.legend(loc="upper left", frameon=True, facecolor="white", edgecolor="none", shadow=False)
+    plt.grid(False)
     plt.tight_layout()
     
     lst_avg_plot_path = out_dir / "05_lst_average_temporal_evolution.png"
@@ -296,6 +298,7 @@ def run_temporal_extraction():
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %y'))
     plt.xticks(rotation=0)
     plt.legend(loc="upper left", frameon=True, facecolor="white", edgecolor="none", shadow=False)
+    plt.grid(False)
     plt.tight_layout()
     
     suhi_plot_path = out_dir / "05_suhi_temporal_evolution.png"
@@ -326,6 +329,7 @@ def run_temporal_extraction():
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %y'))
     plt.xticks(rotation=0)
     plt.legend(loc="upper left", frameon=True, facecolor="white", edgecolor="none", shadow=False)
+    plt.grid(False)
     plt.tight_layout()
     
     suhi_avg_plot_path = out_dir / "05_suhi_average_temporal_evolution.png"

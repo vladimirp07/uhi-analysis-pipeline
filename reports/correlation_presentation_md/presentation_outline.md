@@ -11,14 +11,14 @@
 
 ---
 
-# 2. Metodología del Análisis Bottom-Up
+# 2. Metodología General del Análisis Bottom-Up
 
-*   **Unidad de Observación**: Celdas físicas regulares de 30 metros de resolución espacial.
-*   **Agrupadores Territoriales**: Municipios (Monterrey, San Pedro, Guadalupe, San Nicolás) y 401 AGEBs de la ZMM.
-*   **Método Estadístico**: Coeficiente de correlación de rangos de Spearman ($r$) para medir asociaciones monotónicas (no relaciones de causalidad física directa).
-*   **Filtro de Representatividad**: Umbrales mínimos de muestras para robustez:
-    *   *Nivel Municipio*: $N \ge 50$ (Global) / $N \ge 30$ (Segmentado).
-    *   *Nivel AGEB*: $N \ge 30$ (Global) / $N \ge 15$ (Segmentado).
+*   **Fuentes de Datos y Sensores:** Landsat 8/9 (TIRS diurno, 30m), MODIS Aqua (MYD11A1 nocturno, remuestreado a 30m), Sentinel-2 (NDVI y Cobertura Verde, 10m), Dynamic World (Zonificación de Densidad, 10m), OpenStreetMap (Áreas Industriales vectoriales) y SRTM GL1 (30m) para topografía.
+*   **Línea de Base Rural (Control EPA):** Se definieron 3 zonas rurales externas de referencia (altitud similar y $NDVI > 0.4$) para calcular la anomalía térmica: $\text{SUHI} = LST_{\text{urbana}} - LST_{\text{rural\_baseline}}$.
+*   **Mallado Territorial (Malla Maestra):** Discretización del territorio de la ZMM en cuadrícula regular con celdas físicas de **30 x 30 metros** (181,746 celdas analizadas).
+*   **Análisis Multiescala (Buffers):** Coberturas verde e industrial calculadas localmente y en **buffers circulares concéntricos de 100m, 250m, 500m y 1000m**.
+*   **Segmentación por Densidad Construida:** Clasificación en Baja (< 20%), Media (20% - 60%) y Alta ($\ge$ 60% construida).
+*   **Correlaciones de Spearman ($r$) y Robustez:** Correlación bivariada no lineal a nivel de celdas agrupadas por Municipio y por AGEB. Robustez mediante filtros de representatividad estadística: $N \ge 30$ celdas (AGEB) y $N \ge 50$ (Municipio).
 
 ---
 

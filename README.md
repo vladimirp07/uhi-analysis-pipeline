@@ -6,6 +6,29 @@ El pipeline está diseñado de manera paramétrica y modular, funcionando como u
 
 ---
 
+## Documentación Central del Proyecto (`docs/`)
+
+La documentación detallada del proyecto se encuentra centralizada y estructurada de la siguiente manera:
+
+### 1. Documentación Pública y Reproducible (`docs/public/`)
+*   **[README Técnico](./docs/public/README.md):** Introducción general, objetivos y mapa de navegación de la documentación.
+*   **[METHODOLOGY.md](./docs/public/METHODOLOGY.md):** Flujo de procesamiento paso a paso, desde la ingesta de GEE hasta la delimitación y priorización de hotspots.
+*   **[DATA_SOURCES.md](./docs/public/DATA_SOURCES.md):** Catálogo de sensores satelitales, resoluciones espaciales, variables derivadas y limitaciones físicas.
+*   **[RESULTS_SUMMARY.md](./docs/public/RESULTS_SUMMARY.md):** Resultados diurnos y nocturnos corregidos, hotspots priorizados y segmentación por densidad construida.
+*   **[REPRODUCIBILITY.md](./docs/public/REPRODUCIBILITY.md):** Guía de instalación, configuración del entorno, orden de ejecución y outputs esperados.
+*   **[FIGURES_INDEX.md](./docs/public/FIGURES_INDEX.md):** Catálogo e índice de figuras analíticas generadas para presentaciones y reportes.
+
+### 2. Documentación Operativa y de Control Local (`docs/private/` - Excluida de Git)
+*   **[PROJECT_STATUS.md](./docs/private/PROJECT_STATUS.md):** Estado de avance de componentes, inconsistencias resueltas y pendientes críticas de validación.
+*   **[NEXT_STEPS.md](./docs/private/NEXT_STEPS.md):** Planificación de la siguiente fase (modelación 3D SVF, albedos, calor antropogénico, autorregresivos).
+*   **[TECHNICAL_NOTES.md](./docs/private/TECHNICAL_NOTES.md):** Notas detalladas sobre bugs resueltos (proyección sinusoidal de MODIS nocturno en GEE) y estabilidad de semillas GWR.
+*   **[RESULTS_INTERPRETATION_NOTES.md](./docs/private/RESULTS_INTERPRETATION_NOTES.md):** Discusión de patrones territoriales (spillover intermunicipal, saturación de concreto e injusticia ambiental).
+*   **[TODO_RESTART_CHECKLIST.md](./docs/private/TODO_RESTART_CHECKLIST.md):** Lista de verificación para reactivar el entorno y volver a correr el pipeline rápidamente.
+*   **[CLOSING_REPORT.md](./docs/private/CLOSING_REPORT.md):** Resumen final de cierre y entrega del MVP v1.
+
+---
+
+
 ## 1. Estructura del Proyecto
 
 El repositorio está organizado bajo una estructura modular estándar para proyectos de ciencia de datos geoespaciales:
@@ -14,20 +37,19 @@ El repositorio está organizado bajo una estructura modular estándar para proye
 UHI_Analysis_pipeline_MVP_v1/
 ├── data/                             # Datos geográficos (raw, interim, processed) - en gitignore
 ├── notebooks/                        # Jupyter Notebooks principales para ejecución interactiva
-│   ├── exploratorios/                # Notebooks históricos de desarrollo (en proceso)
+│   ├── exploratorios/                # Notebooks de desarrollo y exploración no validados (GWR)
 │   ├── 01_uhi_spatial_correlation_regional.ipynb
-│   ├── 02_uhi_hotspot_case_studies.ipynb
-│   └── 03_uhi_gwr_spatial_correlation.ipynb
+│   └── 02_uhi_hotspot_case_studies.ipynb
 ├── scripts/                          # Scripts ejecutables autónomos de análisis avanzado
+│   ├── exploratorios/                # Desarrollos exploratorios y auditorías locales no validadas (GWR)
+│   │   ├── run_gwr_sensitivity_audit.py
+│   │   └── validate_gwr.py
 │   ├── __init__.py
 │   ├── run_bottom_up_regional_analysis.py # Análisis multiescala por densidad, buffers y municipios
-│   ├── run_coldspots_analysis.py     # Delimitación y priorización de coldspots urbanos (DBSCAN)
 │   ├── run_density_zones_analysis.py # Análisis segmentado por densidad de impermeabilidad
 │   ├── run_diagnostics.py            # Diagnóstico de calidad de datos y emparejamiento censal
-│   ├── run_gwr_sensitivity_audit.py  # Auditoría y comparación de semillas para GWR
 │   ├── run_hotspots_analysis.py      # Detección de hotspots térmicos críticos (DBSCAN)
-│   ├── run_scale_correlation_analysis.py # Análisis del efecto de escala y ajuste local GWR
-│   └── validate_gwr.py               # Validación estadística y pruebas de colinealidad de GWR
+│   └── run_scale_correlation_analysis.py # Análisis multiescala del efecto de escala (MAUP)
 ├── reports/                          # NUEVO: Reportes y entregables técnicos generados
 │   └── bottom_up_analysis_report.md  # Reporte de análisis regional bottom-up y recomendaciones
 ├── outputs/                          # Figuras, mapas interactivos (Folium) y tablas CSV generadas
@@ -54,7 +76,7 @@ UHI_Analysis_pipeline_MVP_v1/
 
 *   **`main.py` (Orquestador Base):** Es el punto de entrada oficial para la **extracción, procesamiento y preparación de los datos**. Se encarga de descargar insumos satelitales vía GEE, generar la cuadrícula espacial de 30m, calcular la anomalía térmica de la SUHI restando el promedio de control rural, integrar el Censo INEGI 2020 a nivel de AGEB y consolidar las bases de datos maestras (`data/processed/malla_modelado_multiescala_mty.gpkg` y `data/processed/ageb_maestra_mty_2026.gpkg`).
 *   **`src/` (Módulos Reutilizables):** Contiene la lógica interna y las funciones empaquetadas (módulos de Python). No contiene scripts de ejecución directa; proporciona las herramientas de backend que importan tanto `main.py` como los scripts en `scripts/`.
-*   **`scripts/` (Análisis Avanzado):** Alberga los scripts ejecutables independientes de análisis de datos. Consumen las bases de datos preparadas por `main.py` y ejecutan tareas analíticas específicas como detección de clusters espaciales (DBSCAN), correlaciones multiescala por amortiguamiento (buffers), auditoría de modelos locales (GWR) y generación de reportes específicos en la carpeta `reports/`.
+*   **`scripts/` (Análisis Avanzado):** Alberga los scripts ejecutables independientes de análisis de datos. Consumen las bases de datos preparadas por `main.py` y ejecutan tareas analíticas específicas como detección de clusters espaciales (DBSCAN), correlaciones multiescala por amortiguamiento (buffers) y generación de reportes específicos en la carpeta `reports/`.
 
 ---
 
@@ -79,8 +101,8 @@ Una vez que `main.py` genera las bases consolidadas, se pueden correr los análi
 
 *   **Análisis Regional Bottom-Up (`run_bottom_up_regional_analysis.py`):** Realiza un análisis multiescala de correlaciones de Spearman segmentado por el tipo de densidad construida (Baja, Media, Alta) y 5 escalas de buffers (30m, 100m, 250m, 500m, 1000m) para cada uno de los 4 municipios (Monterrey, San Pedro, Guadalupe, San Nicolás) y a nivel individual de 383 AGEBs. Genera un reporte técnico de política pública en `reports/bottom_up_analysis_report.md`.
 *   **Análisis por Zonas de Densidad (`run_density_zones_analysis.py`):** Segmenta el comportamiento de las correlaciones a escala ZMM para aislar los efectos de la vegetación en periferias y de la industria en zonas de densidad construida intermedia.
-*   **Detección de Hotspots y Coldspots (`run_hotspots_analysis.py` y `run_coldspots_analysis.py`):** Utilizan el algoritmo de agrupamiento espacial DBSCAN para aislar islas de calor críticas (hotspots) e islas de frío (coldspots) dentro de la trama urbana, calculando el Índice de Eficacia de Enfriamiento (CEI) para priorizar la infraestructura verde y mitigar la inercia térmica.
-*   **Modelado Local GWR y MAUP (`run_scale_correlation_analysis.py`, `run_gwr_sensitivity_audit.py` y `validate_gwr.py`):** Mitigan el Problema de la Unidad de Área Modificable (MAUP) y la no estacionariedad espacial aplicando modelos de Regresión Ponderada Geográficamente (GWR), validando colinealidad local (Condition Number) y consistencia ante variaciones de semilla.
+*   **Detección de Hotspots Térmicos (`run_hotspots_analysis.py`):** Utiliza el algoritmo de agrupamiento espacial DBSCAN para aislar núcleos de calor críticos (hotspots) dentro de la trama urbana y priorizarlos mediante un Puntaje de Criticidad Física.
+*   **Análisis de Efecto de Escala (`run_scale_correlation_analysis.py`):** Evalúa el Problema de la Unidad de Área Modificable (MAUP) mediante análisis de correlación Spearman multiescala.
 
 ---
 
@@ -88,7 +110,6 @@ Una vez que `main.py` genera las bases consolidadas, se pueden correr los análi
 
 *   **`01_uhi_spatial_correlation_regional.ipynb`:** Orquestación interactiva del análisis de correlación. Muestra el scatterplot de línea base (cobertura verde vs SUHI), las matrices globales de Spearman y llama dinámicamente al motor de análisis bottom-up municipal.
 *   **`02_uhi_hotspot_case_studies.ipynb`:** Análisis interactivo y mapas de Folium para los casos de estudio de islas de calor urbanas del algoritmo DBSCAN.
-*   **`03_uhi_gwr_spatial_correlation.ipynb`:** Implementación visual y auditoría espacial de los coeficientes locales resultantes de la regresión ponderada geográficamente.
 *   **`exploratorios/`:** Carpeta que contiene notebooks de desarrollo e investigación histórica (diagnósticos, optimización y machine learning espacial) actualmente en proceso de actualización.
 
 ---

@@ -57,3 +57,6 @@ outputs/
 cache/
 resources/
 scratch/
+docs/private/
+notebooks/exploratorios/
+

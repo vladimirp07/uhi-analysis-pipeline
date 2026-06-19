@@ -369,8 +369,8 @@ def main():
     plt.close()
     print(f"      Gráfica comparativa del promedio guardada en: {fig_comp_avg_path.relative_to(base_dir)}")
 
-    # B. Mapa General de Hotspots (Overview Map)
-    print("[7/8] Generando mapa satelital general del área de estudio (Overview Map)...")
+    # B. Mapa General de Hotspots (Overview Map - Top 4)
+    print("[7/8] Generando mapas satelitales generales del área de estudio (Overview Maps)...")
     # Filtrar celdas de los hotspots seleccionados y Ternium para el mapa
     map_ids = top_3_ids + [38]
     gdf_map_cells = gdf_clusters[gdf_clusters['hotspot_cluster_id'].isin(map_ids)].to_crs(epsg=3857)
@@ -389,24 +389,29 @@ def main():
         legend=True,
         legend_kwds={
             'label': 'Intensidad SUHI Diurna (°C)',
-            'orientation': 'horizontal',
-            'pad': 0.03,
-            'shrink': 0.7,
+            'orientation': 'vertical',
+            'pad': 0.02,
+            'shrink': 0.6,
             'aspect': 30
         }
     )
     
+    # Ajustar tamaño de textos en el colorbar (hacerlos más grandes)
+    cax = fig.axes[-1]
+    cax.tick_params(labelsize=14)
+    cax.yaxis.label.set_size(16)
+    
     # Añadir marcadores para los centroides de los hotspots
     colors_markers = ['#b71c1c', '#e65100', '#f57c00', '#ffb300']
-    names_hotspots = ['Hotspot 1 (Centro-San Nic)', 'Hotspot 2 (Z. Ind. S. Nic)', 'Hotspot 3 (Valle Oriente)', 'Hotspot 4 (Ternium - Cluster 38)']
+    names_hotspots = ['Hotspot 1 (Centro-San Nic)', 'Hotspot 2 (Z. Ind. S. Nic)', 'Hotspot 3 (Valle Oriente)', 'Hotspot 4 (San Nicolás - Cluster 38)']
     
     for idx, row in top_3_df.iterrows():
         p_utm = gpd.GeoSeries([Point(row['cent_x'], row['cent_y'])], crs="EPSG:4326").to_crs(epsg=3857).iloc[0]
-        ax.plot(p_utm.x, p_utm.y, marker='o', color='white', markerfacecolor=colors_markers[idx], markersize=14, markeredgewidth=2, markeredgecolor='black')
-        ax.annotate(f"H{idx+1}", (p_utm.x, p_utm.y), textcoords="offset points", xytext=(0,10), ha='center', fontsize=10, fontweight='bold', color='white',
+        ax.plot(p_utm.x, p_utm.y, marker='o', color='white', markerfacecolor=colors_markers[idx], markersize=18, markeredgewidth=2, markeredgecolor='black')
+        ax.annotate(f"H{idx+1}", (p_utm.x, p_utm.y), textcoords="offset points", xytext=(0,12), ha='center', fontsize=14, fontweight='bold', color='white',
                     path_effects=[plt.matplotlib.patheffects.withStroke(linewidth=3, foreground="black")])
                     
-    # Añadir marcador de Ternium en el centroide de su isla de calor (Cluster 38)
+    # Añadir marcador en el centroide de su isla de calor (Cluster 38)
     c38_gdf_utm = gdf_clusters[gdf_clusters['hotspot_cluster_id'] == 38].to_crs(epsg=32614)
     if not c38_gdf_utm.empty:
         c38_cent = c38_gdf_utm.union_all().centroid
@@ -414,8 +419,9 @@ def main():
     else:
         t_utm = ternium_point_utm.to_crs(epsg=3857).iloc[0]
         
-    # No dibujamos el marcador 'X' para que la isla de calor sea completamente visible
-    ax.annotate("H4", (t_utm.x, t_utm.y), textcoords="offset points", xytext=(0,10), ha='center', fontsize=10, fontweight='bold', color='#ffeb3b',
+    # Dibujar el marcador para H4 exactamente como los demás
+    ax.plot(t_utm.x, t_utm.y, marker='o', color='white', markerfacecolor=colors_markers[3], markersize=18, markeredgewidth=2, markeredgecolor='black')
+    ax.annotate("H4", (t_utm.x, t_utm.y), textcoords="offset points", xytext=(0,12), ha='center', fontsize=14, fontweight='bold', color='white',
                 path_effects=[plt.matplotlib.patheffects.withStroke(linewidth=3, foreground="black")])
                 
     # Ajustar límites geográficos para coincidir exactamente con el mapa de coldspots (comparabilidad espacial)
@@ -426,22 +432,68 @@ def main():
     ctx.add_basemap(ax, source=ctx.providers.Esri.WorldImagery)
     
     # Estética del mapa
-    ax.set_title("Top 4 Hotspots Térmicos SUHI y Planta Ternium Guerrero\nZona Metropolitana de Monterrey - Imagen Satelital", fontsize=14, fontweight='bold', pad=15, color='#263238')
+    ax.set_title("Top 4 Hotspots Térmicos", fontsize=22, fontweight='bold', pad=15, color='#263238')
     ax.set_axis_off()
     
-    # Crear parches para leyenda manual
+    # Crear parches para leyenda manual (leyenda un 40% más pequeña para que no cubra el contenido)
     legend_patches = [
         mpatches.Patch(color=colors_markers[0], alpha=0.8, label='Hotspot 1 (Centro Mty / S. Nicolás)'),
         mpatches.Patch(color=colors_markers[1], alpha=0.8, label='Hotspot 2 (Zona Ind. San Nicolás)'),
         mpatches.Patch(color=colors_markers[2], alpha=0.8, label='Hotspot 3 (Eje Valle Oriente / San Pedro)'),
-        mpatches.Patch(color=colors_markers[3], alpha=0.8, label='Hotspot 4 (Ternium - Cluster 38)')
+        mpatches.Patch(color=colors_markers[3], alpha=0.8, label='Hotspot 4 (San Nicolás - Cluster 38)')
     ]
-    ax.legend(handles=legend_patches, loc='upper left', facecolor='#fafafa', edgecolor='#b0bec5', fontsize=9.5)
+    ax.legend(handles=legend_patches, loc='upper left', facecolor='#fafafa', edgecolor='#b0bec5', fontsize=8.5)
     
     fig_overview_path = figures_dir / "hotspots_top3_overview_map.png"
     plt.savefig(fig_overview_path, dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"      Mapa de panorama general guardado en: {fig_overview_path.relative_to(base_dir)}")
+    print(f"      Mapa de panorama general (Top 4) guardado en: {fig_overview_path.relative_to(base_dir)}")
+
+    # B2. Mapa General de Todas las Islas de Calor (All Hotspots Overview Map)
+    print("      Generando mapa satelital general de todas las islas de calor (All Hotspots Map)...")
+    gdf_map_cells_all = gdf_clusters.to_crs(epsg=3857)
+    
+    fig, ax = plt.subplots(figsize=(12, 12), dpi=300)
+    
+    # Dibujar la malla de todas las islas de calor coloreada por SUHI
+    gdf_map_cells_all.plot(
+        column=target_col,
+        cmap='magma',
+        alpha=0.75,
+        ax=ax,
+        edgecolor='none',
+        linewidth=0,
+        vmin=0,
+        legend=True,
+        legend_kwds={
+            'label': 'Intensidad SUHI Diurna (°C)',
+            'orientation': 'vertical',
+            'pad': 0.02,
+            'shrink': 0.6,
+            'aspect': 30
+        }
+    )
+    
+    # Ajustar tamaño de textos en el colorbar (hacerlos más grandes)
+    cax = fig.axes[-1]
+    cax.tick_params(labelsize=14)
+    cax.yaxis.label.set_size(16)
+    
+    # Ajustar límites geográficos para coincidir exactamente
+    ax.set_xlim(-11175785.45, -11157512.80)
+    ax.set_ylim(2953993.73, 2967054.28)
+    
+    # Descargar mapa base satelital
+    ctx.add_basemap(ax, source=ctx.providers.Esri.WorldImagery)
+    
+    # Estética del mapa
+    ax.set_title("Hotspots Térmicos en la ZMM", fontsize=22, fontweight='bold', pad=15, color='#263238')
+    ax.set_axis_off()
+    
+    fig_all_overview_path = figures_dir / "all_hotspots_overview_map.png"
+    plt.savefig(fig_all_overview_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"      Mapa de todas las islas de calor guardado en: {fig_all_overview_path.relative_to(base_dir)}")
 
     # C. Generar Mapas de Zoom de los Hotspots
     print("[8/8] Generando mapas satelitales detallados (Zoom Maps)...")
