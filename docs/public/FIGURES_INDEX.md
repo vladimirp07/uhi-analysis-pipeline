@@ -1,4 +1,4 @@
-# Índice de Figuras Analíticas (SUHI de la Zona Metropolitana de Monterrey) - Versión Oficial Depurada
+# Índice de Figuras Analíticas (SUHI de la Zona Metropolitana de Monterrey)
 
 Este índice clasifica y describe algunas de las figuras oficiales y de avance real del proyecto que se conservan en el repositorio de manera local.
 

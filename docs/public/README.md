@@ -43,14 +43,12 @@ La documentación detallada del proyecto se organiza en los siguientes archivos 
 El proyecto mantiene una estructura modular estándar para garantizar su reproducibilidad y extensibilidad:
 
 ```text
-UHI_Analysis_pipeline_MVP_v1/
-├── docs/                             # Documentación del proyecto (Pública y Privada)
-│   ├── public/                       # Documentación técnica reproducible y publicable
-│   └── private/                      # Notas internas, pendientes y bitácoras (excluido por gitignore)
+UHI_Analysis_pipeline_v1/
+├── docs/                             # Documentación del proyecto
+│   └── public/                       # Documentación técnica reproducible
 ├── data/                             # Datos geográficos crudos, intermedios y procesados (excluido)
-├── notebooks/                        # Jupyter Notebooks de análisis y visualización interactiva
+├── notebooks/                        # Jupyter Notebooks principales para ejecución interactiva
 ├── scripts/                          # Scripts de Python autónomos para procesamiento y modelación
-├── reports/                          # Reportes técnicos de correlaciones y catálogos de imágenes
 ├── src/                              # Backend del pipeline (módulos de lógica geoespacial)
 ├── main.py                           # Orquestador del pipeline base de preparación de datos
 └── requirements.txt                  # Dependencias del entorno de Python

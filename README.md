@@ -6,25 +6,16 @@ El pipeline está diseñado de manera paramétrica y modular, permitiendo estudi
 
 ---
 
-## Documentación Central del Proyecto (`docs/`)
+## Documentación del Proyecto (`docs/public/`)
 
-La documentación detallada del proyecto se encuentra centralizada y estructurada de la siguiente manera:
+La documentación detallada del proyecto se organiza de la siguiente manera:
 
-### 1. Documentación Pública y Reproducible (`docs/public/`)
 *   **[README Técnico](./docs/public/README.md):** Introducción general, objetivos y mapa de navegación de la documentación.
 *   **[METHODOLOGY.md](./docs/public/METHODOLOGY.md):** Flujo de procesamiento paso a paso, desde la ingesta de GEE hasta la delimitación y priorización de hotspots.
 *   **[DATA_SOURCES.md](./docs/public/DATA_SOURCES.md):** Catálogo de sensores satelitales, resoluciones espaciales, variables derivadas y limitaciones físicas.
 *   **[RESULTS_SUMMARY.md](./docs/public/RESULTS_SUMMARY.md):** Resultados diurnos y nocturnos corregidos, hotspots priorizados y segmentación por densidad construida.
 *   **[REPRODUCIBILITY.md](./docs/public/REPRODUCIBILITY.md):** Guía de instalación, configuración del entorno, orden de ejecución y outputs esperados.
 *   **[FIGURES_INDEX.md](./docs/public/FIGURES_INDEX.md):** Catálogo e índice de figuras analíticas generadas para presentaciones y reportes.
-
-### 2. Documentación Operativa y de Control Local (`docs/private/` - Excluida de Git)
-*   **[PROJECT_STATUS.md](./docs/private/PROJECT_STATUS.md):** Estado de avance de componentes, inconsistencias resueltas y pendientes críticas de validación.
-*   **[NEXT_STEPS.md](./docs/private/NEXT_STEPS.md):** Planificación de la siguiente fase (modelación 3D SVF, albedos, calor antropogénico, autorregresivos).
-*   **[TECHNICAL_NOTES.md](./docs/private/TECHNICAL_NOTES.md):** Notas detalladas sobre bugs resueltos (proyección sinusoidal de MODIS nocturno en GEE) y estabilidad de semillas GWR.
-*   **[RESULTS_INTERPRETATION_NOTES.md](./docs/private/RESULTS_INTERPRETATION_NOTES.md):** Discusión de patrones territoriales (spillover intermunicipal, saturación de concreto e injusticia ambiental).
-*   **[TODO_RESTART_CHECKLIST.md](./docs/private/TODO_RESTART_CHECKLIST.md):** Lista de verificación para reactivar el entorno y volver a correr el pipeline rápidamente.
-*   **[CLOSING_REPORT.md](./docs/private/CLOSING_REPORT.md):** Resumen final de cierre y entrega de la primera versión del pipeline.
 
 ---
 
@@ -50,8 +41,6 @@ UHI_Analysis_pipeline_MVP_v1/
 │   ├── run_diagnostics.py            # Diagnóstico de calidad de datos y emparejamiento censal
 │   ├── run_hotspots_analysis.py      # Detección de hotspots térmicos críticos (DBSCAN)
 │   └── run_scale_correlation_analysis.py # Análisis multiescala del efecto de escala (MAUP)
-├── reports/                          # NUEVO: Reportes y entregables técnicos generados
-│   └── bottom_up_analysis_report.md  # Reporte de análisis regional bottom-up y recomendaciones
 ├── outputs/                          # Figuras, mapas interactivos (Folium) y tablas CSV generadas
 ├── src/                              # Backend del pipeline (módulos reutilizables)
 │   ├── config.py                     # Parámetros, bbox y constantes de rutas
@@ -76,7 +65,7 @@ UHI_Analysis_pipeline_MVP_v1/
 
 *   **`main.py` (Orquestador Base):** Es el punto de entrada oficial para la **extracción, procesamiento y preparación de los datos**. Se encarga de descargar insumos satelitales vía GEE, generar la cuadrícula espacial de 30m, calcular la anomalía térmica de la SUHI restando el promedio de control rural, integrar el Censo INEGI 2020 a nivel de AGEB y consolidar las bases de datos maestras (`data/processed/malla_modelado_multiescala_mty.gpkg` y `data/processed/ageb_maestra_mty_2026.gpkg`).
 *   **`src/` (Módulos Reutilizables):** Contiene la lógica interna y las funciones empaquetadas (módulos de Python). No contiene scripts de ejecución directa; proporciona las herramientas de backend que importan tanto `main.py` como los scripts en `scripts/`.
-*   **`scripts/` (Análisis Avanzado):** Alberga los scripts ejecutables independientes de análisis de datos. Consumen las bases de datos preparadas por `main.py` y ejecutan tareas analíticas específicas como detección de clusters espaciales (DBSCAN), correlaciones multiescala por amortiguamiento (buffers) y generación de reportes específicos en la carpeta `reports/`.
+*   **`scripts/` (Análisis Avanzado):** Alberga los scripts ejecutables independientes de análisis de datos. Consumen las bases de datos preparadas por `main.py` y ejecutan tareas analíticas específicas como detección de clusters espaciales (DBSCAN) y correlaciones multiescala por amortiguamiento (buffers).
 
 ---
 
