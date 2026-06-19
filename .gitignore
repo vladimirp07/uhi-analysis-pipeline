@@ -60,4 +60,5 @@ scratch/
 docs/private/
 notebooks/exploratorios/
 reports/
+.agents/
 
