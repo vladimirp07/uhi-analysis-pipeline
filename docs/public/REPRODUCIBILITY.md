@@ -1,4 +1,4 @@
-# Guía de Reproducibilidad del Pipeline SUHI Monterrey
+# Guía de Reproducibilidad del Pipeline SUHI de la Zona Metropolitana de Monterrey
 
 Este documento describe las dependencias, configuraciones de entorno y el flujo secuencial recomendado para ejecutar el pipeline de análisis de la Isla de Calor Urbana Superficial (SUHI) diurna y nocturna en la Zona Metropolitana de Monterrey y reproducir la totalidad de las bases de datos, análisis y figuras del proyecto.
 

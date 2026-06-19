@@ -1,4 +1,4 @@
-# Contexto: Isla de Calor Urbana Superficial (SUHI) en Monterrey
+# Contexto: Isla de Calor Urbana Superficial (SUHI) en la Zona Metropolitana de Monterrey
 
 *   **Desafío**: La Zona Metropolitana de Monterrey (ZMM) experimenta una intensa presión térmica urbana.
 *   **Enfoque de Análisis**: Transición de análisis agregados (Top-Down) a un análisis de grano fino (**Bottom-Up**).

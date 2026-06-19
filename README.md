@@ -1,4 +1,4 @@
-# Pipeline de Análisis Multitemporal de Islas de Calor Urbanas Superficiales (SUHI) en Monterrey (2026)
+# Pipeline de Análisis Multitemporal de Islas de Calor Urbanas Superficiales (SUHI) en la Zona Metropolitana de Monterrey (2026)
 
 Este repositorio alberga el **Producto Mínimo Viable (MVP) v1** del pipeline de análisis geoespacial, biofísico y socioambiental de la **Isla de Calor Urbana Superficial (SUHI - Surface Urban Heat Island)** en la Zona Metropolitana de Monterrey (ZMM) para el año **2026**.
 
@@ -88,7 +88,7 @@ El pipeline de preparación de datos orquestado por `main.py` ejecuta secuencial
 2.  **Construcción de Malla (Paso 2):** Generación de la cuadrícula base regular de 30 metros proyectada en UTM Zona 14N (EPSG:32614) que define las unidades de observación del modelo.
 3.  **Descarga Satelital (Paso 3 y 4):** Descarga del compuesto de mediana de primavera de Temperatura Superficial Terrestre (LST) de Landsat 8 y del NDVI máximo de Sentinel-2. Se calcula el porcentaje de cobertura verde (`green_pct`) mediante remuestreo de celdas de 10m a 30m.
 4.  **Clasificación de Suelo (Paso 5 y 6):** Descarga de coberturas de suelo de Dynamic World (Built, Trees, Bare, Water, Grass) y descarga de polígonos industriales y cuerpos de agua de OpenStreetMap (OSM) para calcular la densidad de ocupación industrial local.
-5.  **Calibración SUHI (Paso 7):** Cálculo de la anomalía de la SUHI diurna (`suhi_day_c`) restando a la LST urbana la mediana de 3 zonas rurales externas en Monterrey.
+5.  **Calibración SUHI (Paso 7):** Cálculo de la anomalía de la SUHI diurna (`suhi_day_c`) restando a la LST urbana la mediana de 3 zonas rurales externas en la Zona Metropolitana de Monterrey.
 6.  **Medición Euclidiana (Paso 8):** Cálculo de distancias mínimas en metros a zonas industriales generales, cuerpos de agua y a la planta de Ternium Guerrero.
 7.  **Integración Demográfica (Paso 9):** Spatial join de centroides de la malla de 30m a polígonos de AGEB. Agrega datos absolutos del Censo INEGI 2020 y calcula tasas e indicadores demográficos normalizados (densidad poblacional, porcentaje de adultos mayores y niños).
 8.  **Visualizaciones (Paso 10):** Generación automática de matrices de Spearman globales (a escala celda y AGEB), histogramas del EDA y paneles de auditoría espacial.

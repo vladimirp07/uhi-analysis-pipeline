@@ -1,4 +1,4 @@
-# Resumen de Resultados Analíticos del Proyecto SUHI Monterrey (Versión Oficial Depurada)
+# Resumen de Resultados Analíticos del Proyecto SUHI de la Zona Metropolitana de Monterrey (Versión Oficial Depurada)
 
 Este documento presenta una síntesis estructurada de los resultados del proyecto de análisis de la Isla de Calor Urbana Superficial (SUHI) diurna y nocturna en la Zona Metropolitana de Monterrey (ZMM). La estructura de este resumen sigue el orden y flujo de las fases de procesamiento y modelación del pipeline metodológico implementado para facilitar su consulta y comprensión.
 
