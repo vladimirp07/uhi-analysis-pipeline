@@ -2,7 +2,7 @@
 
 Este documento sirve como el punto de partida oficial para la documentación pública del pipeline de análisis geoespacial, biofísico y socioambiental de la Isla de Calor Urbana Superficial (SUHI) en la Zona Metropolitana de Monterrey (ZMM).
 
-El pipeline está diseñado de manera paramétrica y modular para funcionar como un validador analítico clave en tierra para misiones de monitoreo térmico satelital, permitiendo verificar y modelar con alta resolución espacial (30 metros) los patrones de anomalías térmicas urbanas y su correlación espacio-temporal con las coberturas del suelo, la morfología urbana y la cercanía a infraestructura industrial.
+El pipeline está diseñado de manera paramétrica y modular, permitiendo verificar y modelar con alta resolución espacial (30 metros) los patrones de anomalías térmicas urbanas de las islas de calor y su correlación espacio-temporal con las coberturas del suelo, la morfología urbana y la cercanía a la infraestructura industrial.
 
 ---
 
